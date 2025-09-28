@@ -1,0 +1,10 @@
+{
+  "enabledMcpjsonServers": [
+    "serena",
+    "context7"
+  ],
+  "statusLine": {
+    "type": "command",
+    "command": "npx ccusage statusline"
+  }
+}
