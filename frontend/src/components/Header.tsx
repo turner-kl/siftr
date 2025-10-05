@@ -1,0 +1,60 @@
+'use client';
+
+import Link from 'next/link';
+import { Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+export function Header() {
+  return (
+    <header
+      className="border-b bg-card sticky top-0 z-50 shadow-sm"
+      role="banner"
+    >
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            href="/"
+            className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md transition-colors"
+            aria-label="siftr ホームページへ"
+          >
+            <Sparkles
+              className="h-6 w-6 text-primary"
+              aria-hidden="true"
+            />
+            <h1 className="text-xl font-bold text-foreground">
+              siftr
+            </h1>
+          </Link>
+
+          <nav
+            className="flex items-center gap-2"
+            role="navigation"
+            aria-label="メインナビゲーション"
+          >
+            <Button
+              variant="ghost"
+              asChild
+              className="min-h-[44px] min-w-[44px]"
+            >
+              <Link
+                href="/"
+                aria-current="page"
+              >
+                ダッシュボード
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              asChild
+              className="min-h-[44px] min-w-[44px]"
+            >
+              <Link href="/settings">
+                設定
+              </Link>
+            </Button>
+          </nav>
+        </div>
+      </div>
+    </header>
+  );
+}
