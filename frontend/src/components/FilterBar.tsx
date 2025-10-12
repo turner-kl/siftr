@@ -98,7 +98,7 @@ export function FilterBar({
                 variant="ghost"
                 size="sm"
                 onClick={clearSearch}
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 min-h-[44px] min-w-[44px]"
                 aria-label="検索をクリア"
               >
                 <X className="h-4 w-4" aria-hidden="true" />

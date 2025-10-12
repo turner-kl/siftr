@@ -58,6 +58,7 @@ export default function Home() {
       <Header />
 
       <main
+        id="main-content"
         className="container mx-auto px-4 py-8"
         role="main"
       >

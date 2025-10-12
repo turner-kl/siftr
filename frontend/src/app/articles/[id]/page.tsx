@@ -31,6 +31,7 @@ export default function ArticleDetailPage() {
       <div className="min-h-screen bg-background">
         <Header />
         <main
+          id="main-content"
           className="container mx-auto px-4 py-8"
           role="main"
         >
@@ -63,6 +64,7 @@ export default function ArticleDetailPage() {
       <Header />
 
       <main
+        id="main-content"
         className="container mx-auto px-4 py-8"
         role="main"
       >

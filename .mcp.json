@@ -7,7 +7,9 @@
         "git+https://github.com/oraios/serena",
         "serena-mcp-server",
         "--context",
-        "ide-assistant"
+        "ide-assistant",
+        "--enable-web-dashboard",
+        "false"
       ]
     },
     "context7": {

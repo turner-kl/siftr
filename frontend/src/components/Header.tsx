@@ -1,10 +1,19 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function Header() {
+  const pathname = usePathname();
+
+  const navItems = [
+    { href: '/', label: 'ダッシュボード' },
+    { href: '/sources', label: 'データソース' },
+    { href: '/settings', label: '設定' },
+  ];
+
   return (
     <header
       className="border-b bg-card sticky top-0 z-50 shadow-sm"
@@ -31,27 +40,21 @@ export function Header() {
             role="navigation"
             aria-label="メインナビゲーション"
           >
-            <Button
-              variant="ghost"
-              asChild
-              className="min-h-[44px] min-w-[44px]"
-            >
-              <Link
-                href="/"
-                aria-current="page"
-              >
-                ダッシュボード
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              asChild
-              className="min-h-[44px] min-w-[44px]"
-            >
-              <Link href="/settings">
-                設定
-              </Link>
-            </Button>
+            {navItems.map(({ href, label }) => {
+              const isActive = pathname === href;
+              return (
+                <Button
+                  key={href}
+                  variant={isActive ? 'default' : 'ghost'}
+                  asChild
+                  className="min-h-[44px] min-w-[44px]"
+                >
+                  <Link href={href} aria-current={isActive ? 'page' : undefined}>
+                    {label}
+                  </Link>
+                </Button>
+              );
+            })}
           </nav>
         </div>
       </div>

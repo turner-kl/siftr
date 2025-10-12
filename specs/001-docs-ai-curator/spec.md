@@ -34,54 +34,54 @@
 
 ---
 
-## User Scenarios & Testing
+## ユーザーシナリオ & テスト
 
-### Primary User Story
-As an engineer and HR consultant at Deloitte, I want a personalized AI-driven information curation system that automatically collects, analyzes, and summarizes relevant content from multiple sources, so that I can efficiently stay updated on technology trends, global HR trends, and business developments without spending excessive time manually browsing through irrelevant information.
+### 主要ユーザーストーリー
+デロイトの人事コンサルタント兼エンジニアとして、複数の情報源から関連コンテンツを自動収集・分析・要約するパーソナライズされたAI駆動型情報キュレーションシステムが欲しい。これにより、関係のない情報を手動で閲覧する時間を過度に費やすことなく、技術トレンド、グローバル人事トレンド、ビジネス動向について効率的に最新情報を得られるようになりたい。
 
-### Acceptance Scenarios
-1. **Given** the system has collected articles from configured sources, **When** I access my dashboard, **Then** I see a curated list of articles ranked by relevance to my interests and skill level
-2. **Given** an article is available in the system, **When** I view it, **Then** I see both a brief summary for quick judgment and a detailed summary for comprehensive understanding
-3. **Given** I have interacted with articles over time, **When** the system analyzes my behavior, **Then** it provides personalized recommendations that match my evolving interests and skill gaps
-4. **Given** new content is available from multiple sources, **When** the automatic collection runs, **Then** the system categorizes content into technology, HR, and business topics with appropriate priority scoring
-5. **Given** I provide feedback on article usefulness, **When** the system processes this feedback, **Then** future recommendations improve in accuracy and relevance
+### 受け入れシナリオ
+1. **前提** システムが設定された情報源から記事を収集済み、**操作** ダッシュボードにアクセス、**結果** 自分の興味とスキルレベルに応じてランク付けされたキュレーション記事一覧が表示される
+2. **前提** システム内に記事が利用可能、**操作** 記事を表示、**結果** 判断用の簡潔な要約と理解用の詳細な要約の両方が表示される
+3. **前提** 時間をかけて記事とのやり取りを蓄積、**操作** システムが行動を分析、**結果** 進化する興味とスキルギャップに合致するパーソナライズ推薦が提供される
+4. **前提** 複数ソースから新しいコンテンツが利用可能、**操作** 自動収集が実行、**結果** システムがコンテンツを技術・人事・ビジネストピックに分類し適切な優先度スコアを付与
+5. **前提** 記事の有用性についてフィードバックを提供、**操作** システムがフィードバックを処理、**結果** 今後の推薦の精度と関連性が向上
 
-### Edge Cases
-- What happens when external information sources are temporarily unavailable or change their structure?
-- How does the system handle duplicate content from multiple sources?
-- What occurs when AI summarization fails for certain content types?
-- How does the system behave when a user's interests shift significantly over time?
+### エッジケース
+- 外部情報源が一時的に利用不可能になったり構造が変更された場合はどうなるか？
+- システムは複数ソースからの重複コンテンツをどのように処理するか？
+- 特定のコンテンツタイプでAI要約が失敗した場合はどうなるか？
+- ユーザーの興味が時間とともに大幅に変化した場合、システムはどのように動作するか？
 
-## Requirements
+## 要件
 
-### Functional Requirements
-- **FR-001**: System MUST automatically collect content from configured RSS/Atom feeds on a scheduled basis
-- **FR-002**: System MUST integrate with social media platforms to gather content from specified accounts and hashtags
-- **FR-003**: System MUST support manual addition of URLs for one-time content collection
-- **FR-004**: System MUST categorize collected content into technology, HR, and business domains using AI analysis
-- **FR-005**: System MUST assign skill level ratings (beginner/intermediate/advanced) to technical content
-- **FR-006**: System MUST generate two types of summaries: brief judgment summaries (2-3 lines) and detailed understanding summaries
-- **FR-007**: System MUST score content based on trending relevance and importance
-- **FR-008**: System MUST match user skill levels with content difficulty for personalized filtering
-- **FR-009**: System MUST track user reading behavior and feedback to improve recommendations
-- **FR-010**: System MUST provide tag-based categorization (must-read/recommended/reference/skip)
-- **FR-011**: System MUST extract relevant keywords and technology stack information from content
-- **FR-012**: System MUST support search and filtering by date range, category, and importance level
-- **FR-013**: System MUST provide a responsive interface accessible on both desktop and mobile devices
-- **FR-014**: System MUST maintain user preference settings for information sources and recommendation parameters
-- **FR-015**: System MUST support both Japanese and English content processing
-- **FR-016**: System MUST analyze skill gaps and proactively recommend learning content
-- **FR-017**: System MUST handle content from international sources including Reddit and Hacker News
+### 機能要件
+- **FR-001**: システムは設定されたRSS/Atomフィードからスケジュールベースでコンテンツを自動収集しなければならない
+- **FR-002**: システムは指定されたアカウントやハッシュタグからコンテンツを収集するためにソーシャルメディアプラットフォームと連携しなければならない
+- **FR-003**: システムは一回限りのコンテンツ収集のためのURL手動追加をサポートしなければならない
+- **FR-004**: システムは収集したコンテンツをAI分析を使用して技術・人事・ビジネス領域に分類しなければならない
+- **FR-005**: システムは技術コンテンツにスキルレベル評価（初級/中級/上級）を割り当てなければならない
+- **FR-006**: システムは2種類の要約を生成しなければならない：判断用簡潔要約（2-3行）と理解用詳細要約
+- **FR-007**: システムはトレンド関連性と重要度に基づいてコンテンツにスコアを付けなければならない
+- **FR-008**: システムはパーソナライズフィルタリングのためにユーザーのスキルレベルとコンテンツ難易度をマッチングしなければならない
+- **FR-009**: システムは推薦改善のためにユーザーの閲覧行動とフィードバックを追跡しなければならない
+- **FR-010**: システムはタグベース分類（必読/推奨/参考/スキップ）を提供しなければならない
+- **FR-011**: システムはコンテンツから関連キーワードと技術スタック情報を抽出しなければならない
+- **FR-012**: システムは日付範囲・カテゴリ・重要度レベルによる検索とフィルタリングをサポートしなければならない
+- **FR-013**: システムはデスクトップとモバイルデバイスの両方でアクセス可能なレスポンシブインターフェースを提供しなければならない
+- **FR-014**: システムは情報源と推薦パラメータのユーザー設定を維持しなければならない
+- **FR-015**: システムは日本語と英語両方のコンテンツ処理をサポートしなければならない
+- **FR-016**: システムはスキルギャップを分析し学習コンテンツを能動的に推薦しなければならない
+- **FR-017**: システムはRedditやHacker Newsを含む国際的な情報源からのコンテンツを処理しなければならない
 
-### Key Entities
-- **User**: Represents the individual using the system, including skill profile, interests, and behavioral patterns
-- **Content Source**: External information providers such as RSS feeds, social media accounts, and websites
-- **Article**: Individual pieces of content collected from sources, including metadata and processing status
-- **Summary**: AI-generated condensed versions of articles in both brief and detailed formats
-- **User Interaction**: Records of user behavior including reading history, feedback ratings, and preference changes
-- **Recommendation**: System-generated suggestions based on user profile and content analysis
-- **Category**: Classification system for organizing content by domain (technology/HR/business) and other attributes
-- **Skill Profile**: User's current competency levels and areas of interest for personalization
+### 主要エンティティ
+- **ユーザー**: システムを使用する個人を表し、スキルプロファイル、興味、行動パターンを含む
+- **コンテンツソース**: RSSフィード、ソーシャルメディアアカウント、ウェブサイトなどの外部情報提供者
+- **記事**: 情報源から収集された個々のコンテンツ、メタデータと処理ステータスを含む
+- **要約**: 簡潔版と詳細版両方の形式でAI生成された記事の要約版
+- **ユーザーインタラクション**: 閲覧履歴、フィードバック評価、設定変更を含むユーザー行動の記録
+- **推薦**: ユーザープロファイルとコンテンツ分析に基づくシステム生成の提案
+- **カテゴリ**: 領域（技術/人事/ビジネス）やその他の属性でコンテンツを整理する分類システム
+- **スキルプロファイル**: パーソナライゼーションのためのユーザーの現在のコンピテンシーレベルと興味分野
 
 ---
 
