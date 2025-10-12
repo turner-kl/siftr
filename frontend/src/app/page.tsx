@@ -1,18 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useMemo, useCallback } from 'react';
-import { Header } from '@/components/Header';
-import { ArticleCard } from '@/components/ArticleCard';
-import { FilterBar } from '@/components/FilterBar';
-import { mockArticles } from '@/data/mockArticles';
-import { Category, Priority, createCategoryFilter, createPriorityFilter, createSearchFilter } from '@/types/article';
-import { TrendingUp, BookOpen, Star } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { BookOpen, Star, TrendingUp } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { ArticleCard } from "@/components/ArticleCard";
+import { FilterBar } from "@/components/FilterBar";
+import { Header } from "@/components/Header";
+import { Card, CardContent } from "@/components/ui/card";
+import { mockArticles } from "@/data/mockArticles";
+import {
+  type Category,
+  createCategoryFilter,
+  createPriorityFilter,
+  createSearchFilter,
+  type Priority,
+} from "@/types/article";
 
 export default function Home() {
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedPriorities, setSelectedPriorities] = useState<Priority[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // フィルタリングロジック - 型安全なヘルパーを使用
   const filteredArticles = useMemo(() => {
@@ -31,11 +37,17 @@ export default function Home() {
 
   // 統計情報
   const stats = useMemo(() => {
-    const mustReadCount = filteredArticles.filter((a) => a.priority === 'must-read').length;
+    const mustReadCount = filteredArticles.filter(
+      (a) => a.priority === "must-read",
+    ).length;
     const unreadCount = filteredArticles.filter((a) => !a.isRead).length;
-    const avgTrendScore = filteredArticles.length > 0
-      ? Math.round(filteredArticles.reduce((sum, a) => sum + a.trendScore, 0) / filteredArticles.length)
-      : 0;
+    const avgTrendScore =
+      filteredArticles.length > 0
+        ? Math.round(
+            filteredArticles.reduce((sum, a) => sum + a.trendScore, 0) /
+              filteredArticles.length,
+          )
+        : 0;
 
     return { mustReadCount, unreadCount, avgTrendScore };
   }, [filteredArticles]);
@@ -57,11 +69,7 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main
-        id="main-content"
-        className="container mx-auto px-4 py-8"
-        role="main"
-      >
+      <main id="main-content" className="container mx-auto px-4 py-8">
         {/* 統計情報 */}
         <section
           className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
@@ -81,10 +89,7 @@ export default function Home() {
                     {stats.mustReadCount}
                   </p>
                 </div>
-                <Star
-                  className="h-8 w-8 text-destructive"
-                  aria-hidden="true"
-                />
+                <Star className="h-8 w-8 text-destructive" aria-hidden="true" />
               </div>
             </CardContent>
           </Card>
@@ -103,10 +108,7 @@ export default function Home() {
                     {stats.unreadCount}
                   </p>
                 </div>
-                <BookOpen
-                  className="h-8 w-8 text-primary"
-                  aria-hidden="true"
-                />
+                <BookOpen className="h-8 w-8 text-primary" aria-hidden="true" />
               </div>
             </CardContent>
           </Card>
@@ -136,10 +138,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* フィルターエリア */}
-          <aside
-            className="lg:col-span-1"
-            aria-label="フィルターと検索"
-          >
+          <aside className="lg:col-span-1" aria-label="フィルターと検索">
             <FilterBar
               selectedCategories={selectedCategories}
               selectedPriorities={selectedPriorities}
@@ -151,10 +150,7 @@ export default function Home() {
           </aside>
 
           {/* 記事一覧 */}
-          <section
-            className="lg:col-span-3"
-            aria-labelledby="articles-heading"
-          >
+          <section className="lg:col-span-3" aria-labelledby="articles-heading">
             <div className="mb-4">
               <h2
                 id="articles-heading"
@@ -170,25 +166,15 @@ export default function Home() {
             {filteredArticles.length === 0 ? (
               <Card>
                 <CardContent className="p-8 text-center">
-                  <p
-                    className="text-muted-foreground"
-                    role="status"
-                  >
+                  <p className="text-muted-foreground" role="status">
                     該当する記事が見つかりませんでした
                   </p>
                 </CardContent>
               </Card>
             ) : (
-              <div
-                className="space-y-4"
-                role="feed"
-                aria-busy="false"
-              >
+              <div className="space-y-4" role="feed" aria-busy="false">
                 {filteredArticles.map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    article={article}
-                  />
+                  <ArticleCard key={article.id} article={article} />
                 ))}
               </div>
             )}

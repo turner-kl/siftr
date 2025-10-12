@@ -1,23 +1,29 @@
-'use client';
+"use client";
 
-import { useParams, useRouter } from 'next/navigation';
-import { Header } from '@/components/Header';
-import { mockArticles } from '@/data/mockArticles';
-import { CATEGORY_LABELS, PRIORITY_LABELS, LEVEL_LABELS, CATEGORY_VARIANTS, PRIORITY_VARIANTS } from '@/types/article';
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
 import {
-  Calendar,
-  ExternalLink,
-  TrendingUp,
   AlertCircle,
   ArrowLeft,
   BookOpen,
-} from 'lucide-react';
-import { format } from 'date-fns';
-import { ja } from 'date-fns/locale';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+  Calendar,
+  ExternalLink,
+  TrendingUp,
+} from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { Header } from "@/components/Header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { mockArticles } from "@/data/mockArticles";
+import {
+  CATEGORY_LABELS,
+  CATEGORY_VARIANTS,
+  LEVEL_LABELS,
+  PRIORITY_LABELS,
+  PRIORITY_VARIANTS,
+} from "@/types/article";
 
 export default function ArticleDetailPage() {
   const params = useParams();
@@ -30,23 +36,13 @@ export default function ArticleDetailPage() {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main
-          id="main-content"
-          className="container mx-auto px-4 py-8"
-          role="main"
-        >
+        <main id="main-content" className="container mx-auto px-4 py-8">
           <Card>
             <CardContent className="p-8 text-center">
-              <p
-                className="text-muted-foreground mb-4"
-                role="alert"
-              >
+              <p className="text-muted-foreground mb-4" role="alert">
                 記事が見つかりませんでした
               </p>
-              <Button
-                onClick={() => router.push('/')}
-                className="min-h-[44px]"
-              >
+              <Button onClick={() => router.push("/")} className="min-h-[44px]">
                 <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
                 ダッシュボードに戻る
               </Button>
@@ -57,25 +53,20 @@ export default function ArticleDetailPage() {
     );
   }
 
-  const formattedDate = format(article.publishedAt, 'yyyy年MM月dd日', { locale: ja });
+  const formattedDate = format(article.publishedAt, "yyyy年MM月dd日", {
+    locale: ja,
+  });
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main
-        id="main-content"
-        className="container mx-auto px-4 py-8"
-        role="main"
-      >
+      <main id="main-content" className="container mx-auto px-4 py-8">
         {/* 戻るボタン */}
-        <nav
-          className="mb-6"
-          aria-label="パンくずナビゲーション"
-        >
+        <nav className="mb-6" aria-label="パンくずナビゲーション">
           <Button
             variant="ghost"
-            onClick={() => router.push('/')}
+            onClick={() => router.push("/")}
             className="min-h-[44px]"
           >
             <ArrowLeft className="h-4 w-4 mr-2" aria-hidden="true" />
@@ -98,9 +89,7 @@ export default function ArticleDetailPage() {
                 <Badge variant={PRIORITY_VARIANTS[article.priority]}>
                   {PRIORITY_LABELS[article.priority]}
                 </Badge>
-                <Badge variant="secondary">
-                  {LEVEL_LABELS[article.level]}
-                </Badge>
+                <Badge variant="secondary">{LEVEL_LABELS[article.level]}</Badge>
               </div>
 
               {/* タイトル */}
@@ -185,10 +174,7 @@ export default function ArticleDetailPage() {
               <Separator className="my-6" />
 
               {/* タグ */}
-              <section
-                className="mb-6"
-                aria-labelledby="tags-heading"
-              >
+              <section className="mb-6" aria-labelledby="tags-heading">
                 <h2
                   id="tags-heading"
                   className="text-xl font-semibold mb-3 text-foreground"
@@ -197,13 +183,8 @@ export default function ArticleDetailPage() {
                 </h2>
                 <div className="flex items-center gap-2 flex-wrap">
                   {article.tags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="outline"
-                    >
-                      <span aria-label={`タグ: ${tag}`}>
-                        #{tag}
-                      </span>
+                    <Badge key={tag} variant="outline">
+                      <span aria-label={`タグ: ${tag}`}>#{tag}</span>
                     </Badge>
                   ))}
                 </div>
@@ -213,11 +194,7 @@ export default function ArticleDetailPage() {
 
               {/* 元記事へのリンク */}
               <div>
-                <Button
-                  asChild
-                  size="lg"
-                  className="min-h-[44px]"
-                >
+                <Button asChild size="lg" className="min-h-[44px]">
                   <a
                     href={article.url}
                     target="_blank"

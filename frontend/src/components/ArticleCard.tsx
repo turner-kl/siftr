@@ -1,27 +1,36 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Article, CATEGORY_LABELS, PRIORITY_LABELS, LEVEL_LABELS, CATEGORY_VARIANTS, PRIORITY_VARIANTS } from '@/types/article';
-import { Calendar, ExternalLink, TrendingUp, AlertCircle } from 'lucide-react';
-import { format } from 'date-fns';
-import { ja } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import { AlertCircle, Calendar, ExternalLink, TrendingUp } from "lucide-react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import {
+  type Article,
+  CATEGORY_LABELS,
+  CATEGORY_VARIANTS,
+  LEVEL_LABELS,
+  PRIORITY_LABELS,
+  PRIORITY_VARIANTS,
+} from "@/types/article";
 
 interface ArticleCardProps {
   article: Article;
 }
 
 export function ArticleCard({ article }: ArticleCardProps) {
-  const formattedDate = format(article.publishedAt, 'yyyy/MM/dd', { locale: ja });
+  const formattedDate = format(article.publishedAt, "yyyy/MM/dd", {
+    locale: ja,
+  });
 
   return (
     <Card
       className={cn(
-        'hover:shadow-lg transition-all duration-200 hover:border-primary/50',
-        article.isRead && 'opacity-75',
-        'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2'
+        "hover:shadow-lg transition-all duration-200 hover:border-primary/50",
+        article.isRead && "opacity-75",
+        "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
       )}
       role="article"
       aria-labelledby={`article-title-${article.id}`}
@@ -47,10 +56,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
               >
                 {PRIORITY_LABELS[article.priority]}
               </Badge>
-              <Badge
-                variant="secondary"
-                className="text-xs font-medium"
-              >
+              <Badge variant="secondary" className="text-xs font-medium">
                 {LEVEL_LABELS[article.level]}
               </Badge>
             </div>
@@ -80,36 +86,24 @@ export function ArticleCard({ article }: ArticleCardProps) {
               aria-label="記事の詳細情報"
             >
               <div className="flex items-center gap-1.5">
-                <Calendar
-                  className="h-3.5 w-3.5"
-                  aria-hidden="true"
-                />
+                <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
                 <time dateTime={article.publishedAt.toISOString()}>
                   {formattedDate}
                 </time>
               </div>
               <div className="flex items-center gap-1.5">
-                <ExternalLink
-                  className="h-3.5 w-3.5"
-                  aria-hidden="true"
-                />
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>{article.source}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <TrendingUp
-                  className="h-3.5 w-3.5"
-                  aria-hidden="true"
-                />
+                <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>
                   <span className="sr-only">トレンドスコア:</span>
                   トレンド: {article.trendScore}
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <AlertCircle
-                  className="h-3.5 w-3.5"
-                  aria-hidden="true"
-                />
+                <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>
                   <span className="sr-only">重要度スコア:</span>
                   重要度: {article.importance}
@@ -125,14 +119,8 @@ export function ArticleCard({ article }: ArticleCardProps) {
                 aria-label="記事のタグ"
               >
                 {article.tags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="outline"
-                    className="text-xs"
-                  >
-                    <span aria-label={`タグ: ${tag}`}>
-                      #{tag}
-                    </span>
+                  <Badge key={tag} variant="outline" className="text-xs">
+                    <span aria-label={`タグ: ${tag}`}>#{tag}</span>
                   </Badge>
                 ))}
               </div>
