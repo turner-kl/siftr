@@ -1,15 +1,21 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Header } from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Plus, Trash2, ExternalLink, Rss, Globe } from 'lucide-react';
+import { ExternalLink, Globe, Plus, Rss, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Header } from "@/components/Header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
-type SourceType = 'url' | 'rss';
+type SourceType = "url" | "rss";
 
 interface Source {
   id: string;
@@ -23,36 +29,36 @@ interface Source {
 // モックデータ
 const initialSources: Source[] = [
   {
-    id: '1',
-    type: 'rss',
-    url: 'https://zenn.dev/feed',
-    name: 'Zenn Tech Feed',
-    addedAt: new Date('2025-01-01'),
+    id: "1",
+    type: "rss",
+    url: "https://zenn.dev/feed",
+    name: "Zenn Tech Feed",
+    addedAt: new Date("2025-01-01"),
     isActive: true,
   },
   {
-    id: '2',
-    type: 'rss',
-    url: 'https://news.ycombinator.com/rss',
-    name: 'Hacker News',
-    addedAt: new Date('2025-01-05'),
+    id: "2",
+    type: "rss",
+    url: "https://news.ycombinator.com/rss",
+    name: "Hacker News",
+    addedAt: new Date("2025-01-05"),
     isActive: true,
   },
   {
-    id: '3',
-    type: 'url',
-    url: 'https://www.reddit.com/r/programming',
-    name: 'Reddit r/programming',
-    addedAt: new Date('2025-01-10'),
+    id: "3",
+    type: "url",
+    url: "https://www.reddit.com/r/programming",
+    name: "Reddit r/programming",
+    addedAt: new Date("2025-01-10"),
     isActive: true,
   },
 ];
 
 export default function SourcesPage() {
   const [sources, setSources] = useState<Source[]>(initialSources);
-  const [newUrl, setNewUrl] = useState('');
-  const [newName, setNewName] = useState('');
-  const [sourceType, setSourceType] = useState<SourceType>('rss');
+  const [newUrl, setNewUrl] = useState("");
+  const [newName, setNewName] = useState("");
+  const [sourceType, setSourceType] = useState<SourceType>("rss");
 
   const handleAddSource = () => {
     if (!newUrl.trim() || !newName.trim()) return;
@@ -67,8 +73,8 @@ export default function SourcesPage() {
     };
 
     setSources([...sources, newSource]);
-    setNewUrl('');
-    setNewName('');
+    setNewUrl("");
+    setNewName("");
   };
 
   const handleRemoveSource = (id: string) => {
@@ -77,9 +83,7 @@ export default function SourcesPage() {
 
   const handleToggleActive = (id: string) => {
     setSources(
-      sources.map((s) =>
-        s.id === id ? { ...s, isActive: !s.isActive } : s
-      )
+      sources.map((s) => (s.id === id ? { ...s, isActive: !s.isActive } : s)),
     );
   };
 
@@ -87,7 +91,7 @@ export default function SourcesPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main id="main-content" className="container mx-auto px-4 py-8" role="main">
+      <main id="main-content" className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -115,19 +119,19 @@ export default function SourcesPage() {
                   </label>
                   <div className="flex gap-2">
                     <Button
-                      variant={sourceType === 'rss' ? 'default' : 'outline'}
-                      onClick={() => setSourceType('rss')}
+                      variant={sourceType === "rss" ? "default" : "outline"}
+                      onClick={() => setSourceType("rss")}
                       className="min-h-[44px]"
-                      aria-pressed={sourceType === 'rss'}
+                      aria-pressed={sourceType === "rss"}
                     >
                       <Rss className="h-4 w-4 mr-2" aria-hidden="true" />
                       RSS Feed
                     </Button>
                     <Button
-                      variant={sourceType === 'url' ? 'default' : 'outline'}
-                      onClick={() => setSourceType('url')}
+                      variant={sourceType === "url" ? "default" : "outline"}
+                      onClick={() => setSourceType("url")}
                       className="min-h-[44px]"
-                      aria-pressed={sourceType === 'url'}
+                      aria-pressed={sourceType === "url"}
                     >
                       <Globe className="h-4 w-4 mr-2" aria-hidden="true" />
                       URL
@@ -141,15 +145,15 @@ export default function SourcesPage() {
                     htmlFor="source-url"
                     className="text-sm font-medium text-foreground mb-2 block"
                   >
-                    {sourceType === 'rss' ? 'RSS Feed URL' : 'ウェブサイトURL'}
+                    {sourceType === "rss" ? "RSS Feed URL" : "ウェブサイトURL"}
                   </label>
                   <Input
                     id="source-url"
                     type="url"
                     placeholder={
-                      sourceType === 'rss'
-                        ? 'https://example.com/feed.xml'
-                        : 'https://example.com'
+                      sourceType === "rss"
+                        ? "https://example.com/feed.xml"
+                        : "https://example.com"
                     }
                     value={newUrl}
                     onChange={(e) => setNewUrl(e.target.value)}
@@ -211,10 +215,16 @@ export default function SourcesPage() {
                     <div key={source.id}>
                       <div className="flex items-start gap-4">
                         <div className="flex-shrink-0 mt-1">
-                          {source.type === 'rss' ? (
-                            <Rss className="h-5 w-5 text-primary" aria-hidden="true" />
+                          {source.type === "rss" ? (
+                            <Rss
+                              className="h-5 w-5 text-primary"
+                              aria-hidden="true"
+                            />
                           ) : (
-                            <Globe className="h-5 w-5 text-primary" aria-hidden="true" />
+                            <Globe
+                              className="h-5 w-5 text-primary"
+                              aria-hidden="true"
+                            />
                           )}
                         </div>
 
@@ -223,11 +233,15 @@ export default function SourcesPage() {
                             <h3 className="font-semibold text-foreground">
                               {source.name}
                             </h3>
-                            <Badge variant={source.isActive ? 'default' : 'secondary'}>
-                              {source.isActive ? 'アクティブ' : '停止中'}
+                            <Badge
+                              variant={
+                                source.isActive ? "default" : "secondary"
+                              }
+                            >
+                              {source.isActive ? "アクティブ" : "停止中"}
                             </Badge>
                             <Badge variant="outline">
-                              {source.type === 'rss' ? 'RSS' : 'URL'}
+                              {source.type === "rss" ? "RSS" : "URL"}
                             </Badge>
                           </div>
                           <a
@@ -237,10 +251,13 @@ export default function SourcesPage() {
                             className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1 break-all"
                           >
                             {source.url}
-                            <ExternalLink className="h-3 w-3 flex-shrink-0" aria-hidden="true" />
+                            <ExternalLink
+                              className="h-3 w-3 flex-shrink-0"
+                              aria-hidden="true"
+                            />
                           </a>
                           <p className="text-xs text-muted-foreground mt-1">
-                            追加日: {source.addedAt.toLocaleDateString('ja-JP')}
+                            追加日: {source.addedAt.toLocaleDateString("ja-JP")}
                           </p>
                         </div>
 
@@ -250,9 +267,9 @@ export default function SourcesPage() {
                             size="sm"
                             onClick={() => handleToggleActive(source.id)}
                             className="min-h-[44px] min-w-[44px]"
-                            aria-label={source.isActive ? '停止' : '有効化'}
+                            aria-label={source.isActive ? "停止" : "有効化"}
                           >
-                            {source.isActive ? '停止' : '有効化'}
+                            {source.isActive ? "停止" : "有効化"}
                           </Button>
                           <Button
                             variant="destructive"
@@ -265,7 +282,9 @@ export default function SourcesPage() {
                           </Button>
                         </div>
                       </div>
-                      {index < sources.length - 1 && <Separator className="mt-4" />}
+                      {index < sources.length - 1 && (
+                        <Separator className="mt-4" />
+                      )}
                     </div>
                   ))}
                 </div>

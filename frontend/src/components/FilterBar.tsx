@@ -1,10 +1,15 @@
-'use client';
+"use client";
 
-import { Category, Priority, CATEGORY_LABELS, PRIORITY_LABELS } from '@/types/article';
-import { Search, Filter, X } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Filter, Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  CATEGORY_LABELS,
+  type Category,
+  PRIORITY_LABELS,
+  type Priority,
+} from "@/types/article";
 
 interface FilterBarProps {
   selectedCategories: Category[];
@@ -40,16 +45,19 @@ export function FilterBar({
   };
 
   const clearSearch = () => {
-    onSearchChange('');
+    onSearchChange("");
   };
 
   const clearAllFilters = () => {
     onCategoryChange([]);
     onPriorityChange([]);
-    onSearchChange('');
+    onSearchChange("");
   };
 
-  const hasActiveFilters = selectedCategories.length > 0 || selectedPriorities.length > 0 || searchQuery;
+  const hasActiveFilters =
+    selectedCategories.length > 0 ||
+    selectedPriorities.length > 0 ||
+    searchQuery;
 
   return (
     <Card className="mb-6">
@@ -128,12 +136,12 @@ export function FilterBar({
               return (
                 <Button
                   key={category}
-                  variant={isSelected ? 'default' : 'outline'}
+                  variant={isSelected ? "default" : "outline"}
                   size="sm"
                   onClick={() => toggleCategory(category)}
                   className="min-h-[44px]"
                   aria-pressed={isSelected}
-                  aria-label={`カテゴリ: ${CATEGORY_LABELS[category]}${isSelected ? ' (選択中)' : ''}`}
+                  aria-label={`カテゴリ: ${CATEGORY_LABELS[category]}${isSelected ? " (選択中)" : ""}`}
                 >
                   {CATEGORY_LABELS[category]}
                 </Button>
@@ -160,12 +168,12 @@ export function FilterBar({
               return (
                 <Button
                   key={priority}
-                  variant={isSelected ? 'default' : 'outline'}
+                  variant={isSelected ? "default" : "outline"}
                   size="sm"
                   onClick={() => togglePriority(priority)}
                   className="min-h-[44px]"
                   aria-pressed={isSelected}
-                  aria-label={`優先度: ${PRIORITY_LABELS[priority]}${isSelected ? ' (選択中)' : ''}`}
+                  aria-label={`優先度: ${PRIORITY_LABELS[priority]}${isSelected ? " (選択中)" : ""}`}
                 >
                   {PRIORITY_LABELS[priority]}
                 </Button>
