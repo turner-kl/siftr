@@ -1,9 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as rds from 'aws-cdk-lib/aws-rds';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
-import type { Construct } from 'constructs';
+import * as rds from 'aws-cdk-lib/aws-rds';
+import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import { Construct } from 'constructs';
 
 export interface DatabaseConstructProps {
   vpc: ec2.IVpc;
@@ -121,7 +121,7 @@ export class DatabaseConstruct extends Construct {
     dbSecurityGroup.addIngressRule(
       ec2.Peer.ipv4(props.vpc.vpcCidrBlock),
       ec2.Port.tcp(5432),
-      'Allow PostgreSQL access from VPC'
+      'Allow PostgreSQL access from VPC',
     );
 
     // DB Credentials
@@ -160,7 +160,11 @@ export class DatabaseConstruct extends Construct {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
-    this.dbSecret = this.dbCluster.secret!;
+    // Verify that the database secret was created
+    if (!this.dbCluster.secret) {
+      throw new Error('Database cluster secret was not created');
+    }
+    this.dbSecret = this.dbCluster.secret;
 
     // Outputs
     new cdk.CfnOutput(this, 'ArticlesTableNameOutput', {

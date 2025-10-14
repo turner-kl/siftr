@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
-import type { Construct } from 'constructs';
+import { Construct } from 'constructs';
 
 export class StorageConstruct extends Construct {
   public readonly contentBucket: s3.Bucket;

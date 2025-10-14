@@ -1,13 +1,17 @@
 import * as cdk from 'aws-cdk-lib';
 import type { Construct } from 'constructs';
+import { AnalyzerConstruct } from '../constructs/analyzer-construct';
+import { ApiConstruct } from '../constructs/api-construct';
 import { AuthConstruct } from '../constructs/auth-construct';
+import { CollectorConstruct } from '../constructs/collector-construct';
 import { DatabaseConstruct } from '../constructs/database-construct';
 import { StorageConstruct } from '../constructs/storage-construct';
-import { ApiConstruct } from '../constructs/api-construct';
-import { CollectorConstruct } from '../constructs/collector-construct';
-import { AnalyzerConstruct } from '../constructs/analyzer-construct';
 
-export class SiftrStack extends cdk.Stack {
+export class SiftrBackendStack extends cdk.Stack {
+  public readonly apiUrl: string;
+  public readonly userPoolId: string;
+  public readonly userPoolClientId: string;
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -59,7 +63,7 @@ export class SiftrStack extends cdk.Stack {
     });
 
     // Collector
-    const collector = new CollectorConstruct(this, 'Collector', {
+    new CollectorConstruct(this, 'Collector', {
       vpc,
       articlesTable: database.articlesTable,
       contentBucket: storage.contentBucket,
@@ -67,27 +71,35 @@ export class SiftrStack extends cdk.Stack {
     });
 
     // Analyzer
-    const analyzer = new AnalyzerConstruct(this, 'Analyzer', {
+    new AnalyzerConstruct(this, 'Analyzer', {
       vpc,
       articlesTable: database.articlesTable,
       contentBucket: storage.contentBucket,
       dbCluster: database.dbCluster,
     });
 
+    // Store values for cross-stack references
+    this.apiUrl = api.apiUrl;
+    this.userPoolId = auth.userPool.userPoolId;
+    this.userPoolClientId = auth.userPoolClient.userPoolClientId;
+
     // Outputs
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: auth.userPool.userPoolId,
       description: 'Cognito User Pool ID',
+      exportName: 'SiftrUserPoolId',
     });
 
     new cdk.CfnOutput(this, 'UserPoolClientId', {
       value: auth.userPoolClient.userPoolClientId,
       description: 'Cognito User Pool Client ID',
+      exportName: 'SiftrUserPoolClientId',
     });
 
     new cdk.CfnOutput(this, 'ApiUrl', {
       value: api.apiUrl,
       description: 'API Gateway URL',
+      exportName: 'SiftrApiUrl',
     });
 
     new cdk.CfnOutput(this, 'ArticlesTableName', {

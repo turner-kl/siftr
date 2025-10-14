@@ -13,7 +13,7 @@ AI-driven personalized information curation system - Backend API
 
 ## Design Principles
 
-This backend follows **Domain-Driven Design (DDD)** and **Test-Driven Development (TDD)** practices inspired by [mizchi/ailab](https://github.com/mizchi/ailab).
+This backend follows **Domain-Driven Design (DDD)** and **Test-Driven Development (TDD)** practices.
 
 **Key Architecture**: Pure function-based domain layer with Result type pattern (NO Zod in domain layer).
 

@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
-import type { Construct } from 'constructs';
+import { Construct } from 'constructs';
 
 export interface AuthConstructProps {
   frontendUrl: string;
@@ -48,7 +48,11 @@ export class AuthConstruct extends Construct {
     });
 
     // Email configuration (SES)
-    const emailConfig = this.userPool.node.tryFindChild('EmailConfiguration') as any;
+    // Note: Using type assertion for low-level CDK construct access
+    // This is necessary to configure email settings not exposed through the high-level API
+    const emailConfig = this.userPool.node.tryFindChild(
+      'EmailConfiguration',
+    ) as unknown as { emailSendingAccount?: string } | undefined;
     if (emailConfig) {
       emailConfig.emailSendingAccount = 'COGNITO_DEFAULT';
     }
@@ -76,13 +80,8 @@ export class AuthConstruct extends Construct {
           cognito.OAuthScope.OPENID,
           cognito.OAuthScope.PROFILE,
         ],
-        callbackUrls: [
-          props.frontendUrl,
-          `${props.frontendUrl}/auth/callback`,
-        ],
-        logoutUrls: [
-          props.frontendUrl,
-        ],
+        callbackUrls: [props.frontendUrl, `${props.frontendUrl}/auth/callback`],
+        logoutUrls: [props.frontendUrl],
       },
     });
 

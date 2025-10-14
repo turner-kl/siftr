@@ -1,12 +1,12 @@
 import * as cdk from 'aws-cdk-lib';
+import type * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import type * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as s3 from 'aws-cdk-lib/aws-s3';
-import * as rds from 'aws-cdk-lib/aws-rds';
-import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as eventsources from 'aws-cdk-lib/aws-lambda-event-sources';
-import type { Construct } from 'constructs';
+import type * as rds from 'aws-cdk-lib/aws-rds';
+import type * as s3 from 'aws-cdk-lib/aws-s3';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { Construct } from 'constructs';
 
 export interface AnalyzerConstructProps {
   vpc: ec2.IVpc;
@@ -33,6 +33,11 @@ export class AnalyzerConstruct extends Construct {
       },
     });
 
+    // Verify database secret exists
+    if (!props.dbCluster.secret) {
+      throw new Error('Database cluster secret is required');
+    }
+
     // Analyzer Lambda
     const analyzerFunction = new lambda.Function(this, 'AnalyzerFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -44,7 +49,7 @@ export class AnalyzerConstruct extends Construct {
       environment: {
         ARTICLES_TABLE: props.articlesTable.tableName,
         CONTENT_BUCKET: props.contentBucket.bucketName,
-        DB_SECRET_ARN: props.dbCluster.secret!.secretArn,
+        DB_SECRET_ARN: props.dbCluster.secret.secretArn,
         OPENAI_API_KEY_SECRET: 'siftr/openai-api-key',
         ANTHROPIC_API_KEY_SECRET: 'siftr/anthropic-api-key',
       },
@@ -53,7 +58,7 @@ export class AnalyzerConstruct extends Construct {
     // Grant permissions
     props.articlesTable.grantReadWriteData(analyzerFunction);
     props.contentBucket.grantRead(analyzerFunction);
-    props.dbCluster.secret!.grantRead(analyzerFunction);
+    props.dbCluster.secret.grantRead(analyzerFunction);
     props.dbCluster.connections.allowDefaultPortFrom(analyzerFunction);
 
     // SQS trigger
@@ -61,7 +66,7 @@ export class AnalyzerConstruct extends Construct {
       new eventsources.SqsEventSource(analysisQueue, {
         batchSize: 1,
         maxBatchingWindow: cdk.Duration.seconds(10),
-      })
+      }),
     );
 
     // DynamoDB Stream trigger (new articles)
@@ -75,7 +80,7 @@ export class AnalyzerConstruct extends Construct {
         ],
         batchSize: 10,
         maxBatchingWindow: cdk.Duration.seconds(30),
-      })
+      }),
     );
 
     // TODO: Implement individual analyzers (Summarizer, Categorizer, etc.)

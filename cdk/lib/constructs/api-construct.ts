@@ -1,15 +1,15 @@
-import * as cdk from 'aws-cdk-lib';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as apigateway from 'aws-cdk-lib/aws-apigatewayv2';
-import * as integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
-import * as authorizers from 'aws-cdk-lib/aws-apigatewayv2-authorizers';
-import * as cognito from 'aws-cdk-lib/aws-cognito';
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as s3 from 'aws-cdk-lib/aws-s3';
-import * as rds from 'aws-cdk-lib/aws-rds';
-import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import type { Construct } from 'constructs';
 import * as path from 'node:path';
+import * as cdk from 'aws-cdk-lib';
+import * as apigateway from 'aws-cdk-lib/aws-apigatewayv2';
+import * as authorizers from 'aws-cdk-lib/aws-apigatewayv2-authorizers';
+import * as integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
+import type * as cognito from 'aws-cdk-lib/aws-cognito';
+import type * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import type * as rds from 'aws-cdk-lib/aws-rds';
+import type * as s3 from 'aws-cdk-lib/aws-s3';
+import { Construct } from 'constructs';
 
 export interface ApiConstructProps {
   vpc: ec2.IVpc;
@@ -28,28 +28,36 @@ export class ApiConstruct extends Construct {
   constructor(scope: Construct, id: string, props: ApiConstructProps) {
     super(scope, id);
 
+    // Verify database secret exists
+    if (!props.dbCluster.secret) {
+      throw new Error('Database cluster secret is required');
+    }
+
     // Lambda Web Adapter Layer (ARM64)
     const lambdaAdapterLayerArn = `arn:aws:lambda:${cdk.Stack.of(this).region}:753240598075:layer:LambdaAdapterLayerArm64:25`;
     const lambdaAdapterLayer = lambda.LayerVersion.fromLayerVersionArn(
       this,
       'LambdaAdapterLayer',
-      lambdaAdapterLayerArn
+      lambdaAdapterLayerArn,
     );
 
     // Lambda function (Node.js runtime + ZIP package)
     this.apiFunction = new lambda.Function(this, 'ApiFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'run.sh',
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../../../backend/dist/api'), {
-        bundling: {
-          image: lambda.Runtime.NODEJS_20_X.bundlingImage,
-          command: [
-            'bash',
-            '-c',
-            'cp -r /asset-input/* /asset-output/ && cd /asset-output && npm ci --omit=dev',
-          ],
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, '../../../../backend/dist/api'),
+        {
+          bundling: {
+            image: lambda.Runtime.NODEJS_20_X.bundlingImage,
+            command: [
+              'bash',
+              '-c',
+              'cp -r /asset-input/* /asset-output/ && cd /asset-output && npm ci --omit=dev',
+            ],
+          },
         },
-      }),
+      ),
       layers: [lambdaAdapterLayer],
       vpc: props.vpc,
       vpcSubnets: {
@@ -73,7 +81,7 @@ export class ApiConstruct extends Construct {
         INTERACTIONS_TABLE: props.interactionsTable.tableName,
         CACHE_TABLE: props.cacheTable.tableName,
         CONTENT_BUCKET: props.contentBucket.bucketName,
-        DB_SECRET_ARN: props.dbCluster.secret!.secretArn,
+        DB_SECRET_ARN: props.dbCluster.secret.secretArn,
       },
     });
 
@@ -82,7 +90,7 @@ export class ApiConstruct extends Construct {
     props.interactionsTable.grantReadWriteData(this.apiFunction);
     props.cacheTable.grantReadWriteData(this.apiFunction);
     props.contentBucket.grantReadWrite(this.apiFunction);
-    props.dbCluster.secret!.grantRead(this.apiFunction);
+    props.dbCluster.secret.grantRead(this.apiFunction);
     props.dbCluster.connections.allowDefaultPortFrom(this.apiFunction);
 
     // HTTP API Gateway
@@ -104,13 +112,25 @@ export class ApiConstruct extends Construct {
     });
 
     // Cognito JWT Authorizer
-    const authorizer = new authorizers.HttpUserPoolAuthorizer('CognitoAuthorizer', props.userPool, {
-      userPoolClients: [props.userPool.userPoolProviderName as any],
-      identitySource: ['$request.header.Authorization'],
-    });
+    const authorizer = new authorizers.HttpUserPoolAuthorizer(
+      'CognitoAuthorizer',
+      props.userPool,
+      {
+        // Note: HttpUserPoolAuthorizer expects IUserPoolClient[], but we only have the provider name
+        // This is a known CDK limitation. Using type assertion is acceptable here.
+        userPoolClients: [
+          props.userPool
+            .userPoolProviderName as unknown as cognito.IUserPoolClient,
+        ],
+        identitySource: ['$request.header.Authorization'],
+      },
+    );
 
     // Lambda integration
-    const lambdaIntegration = new integrations.HttpLambdaIntegration('LambdaIntegration', this.apiFunction);
+    const lambdaIntegration = new integrations.HttpLambdaIntegration(
+      'LambdaIntegration',
+      this.apiFunction,
+    );
 
     // Routes
     httpApi.addRoutes({
@@ -127,7 +147,10 @@ export class ApiConstruct extends Construct {
       integration: lambdaIntegration,
     });
 
-    this.apiUrl = httpApi.url!;
+    if (!httpApi.url) {
+      throw new Error('HTTP API URL is not available');
+    }
+    this.apiUrl = httpApi.url;
 
     // Outputs
     new cdk.CfnOutput(this, 'ApiUrlOutput', {
