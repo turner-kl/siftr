@@ -2,7 +2,7 @@
 
 ## Overview
 
-This backend follows **DDD (Domain-Driven Design)** and **TDD (Test-Driven Development)** principles inspired by [mizchi/ailab](https://github.com/mizchi/ailab).
+This backend follows **DDD (Domain-Driven Design)** and **TDD (Test-Driven Development)** principles.
 
 **Key Architecture**: Pure function-based domain layer with Result type pattern (NO Zod in domain layer).
 
