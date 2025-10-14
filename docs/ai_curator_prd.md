@@ -87,7 +87,7 @@ siftr
 
 ### 6.1 技術スタック
 - **フロントエンド**: Next.js + TypeScript + Tailwind CSS + shad/cn
-- **バックエンド**: Node.js + Express + TypeScript
+- **バックエンド**: Node.js + Hono + TypeScript
 - **データベース**: DSQL, DynamoDB
 - **インフラ**: サーバレス
 - **IaC**: CDK
