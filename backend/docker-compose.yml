@@ -1,0 +1,130 @@
+services:
+  # PostgreSQL (Aurora DSQL のローカル代替)
+  postgres:
+    image: postgres:16-alpine
+    container_name: siftr-postgres
+    environment:
+      POSTGRES_DB: siftr
+      POSTGRES_USER: siftr
+      POSTGRES_PASSWORD: siftr_local_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U siftr"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # DynamoDB Local
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    container_name: siftr-dynamodb
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /data"
+    ports:
+      - "8000:8000"
+    volumes:
+      - dynamodb_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # LocalStack (S3, Secrets Manager等)
+  localstack:
+    image: localstack/localstack:latest
+    container_name: siftr-localstack
+    environment:
+      SERVICES: s3,secretsmanager
+      DEBUG: 0
+      DATA_DIR: /tmp/localstack/data
+      EDGE_PORT: 4566
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack_data:/tmp/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD-SHELL", "awslocal s3 ls || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # DynamoDB Admin UI
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin:latest
+    container_name: siftr-dynamodb-admin
+    environment:
+      DYNAMO_ENDPOINT: http://dynamodb:8000
+      AWS_REGION: ap-northeast-1
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+    ports:
+      - "8001:8001"
+    depends_on:
+      - dynamodb
+
+  # pgAdmin (PostgreSQL管理UI)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: siftr-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@siftr.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+  # API (開発サーバー)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: siftr-api
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: siftr
+      POSTGRES_USER: siftr
+      POSTGRES_PASSWORD: siftr_local_password
+      DYNAMODB_ENDPOINT: http://dynamodb:8000
+      S3_ENDPOINT: http://localstack:4566
+      S3_FORCE_PATH_STYLE: "true"
+      AWS_REGION: ap-northeast-1
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+      COGNITO_USER_POOL_ID: ap-northeast-1_local
+      COGNITO_CLIENT_ID: local-client-id
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      dynamodb:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  dynamodb_data:
+  localstack_data:
+  pgadmin_data:
+  node_modules:

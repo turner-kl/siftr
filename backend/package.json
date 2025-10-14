@@ -1,0 +1,51 @@
+{
+  "name": "@siftr/backend",
+  "version": "0.1.0",
+  "description": "siftr backend API and infrastructure",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/api/index.ts",
+    "dev:docker": "docker compose up",
+    "build": "node esbuild.config.mjs",
+    "package": "npm run build && cd dist/api && zip -r ../api.zip .",
+    "test": "vitest",
+    "test:unit": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "db:seed": "tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.705.0",
+    "@aws-sdk/client-dynamodb": "^3.705.0",
+    "@aws-sdk/client-s3": "^3.705.0",
+    "@aws-sdk/client-secrets-manager": "^3.705.0",
+    "@aws-sdk/lib-dynamodb": "^3.705.0",
+    "@hono/node-server": "^1.13.7",
+    "@smithy/node-http-handler": "^3.3.2",
+    "hono": "^4.6.14",
+    "jose": "^5.9.6",
+    "pg": "^8.13.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@aws-sdk/types": "^3.705.0",
+    "@biomejs/biome": "^1.9.4",
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "aws-cdk": "^2.174.2",
+    "aws-cdk-lib": "^2.174.2",
+    "constructs": "^10.4.2",
+    "esbuild": "^0.24.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
