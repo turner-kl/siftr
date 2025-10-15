@@ -1,28 +1,20 @@
 import * as cdk from 'aws-cdk-lib';
 import type * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import type * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import type * as rds from 'aws-cdk-lib/aws-rds';
 import type * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
 export interface CollectorConstructProps {
-  vpc: ec2.IVpc;
   articlesTable: dynamodb.Table;
   contentBucket: s3.Bucket;
-  dbCluster: rds.DatabaseCluster;
+  dsqlClusterId: string;
 }
 
 export class CollectorConstruct extends Construct {
   constructor(scope: Construct, id: string, props: CollectorConstructProps) {
     super(scope, id);
-
-    // Verify database secret exists
-    if (!props.dbCluster.secret) {
-      throw new Error('Database cluster secret is required');
-    }
 
     // Collector Orchestrator Lambda
     const orchestratorFunction = new lambda.Function(
@@ -32,12 +24,11 @@ export class CollectorConstruct extends Construct {
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'index.handler',
         code: lambda.Code.fromAsset('lambda/collector-orchestrator'),
-        vpc: props.vpc,
         timeout: cdk.Duration.minutes(1),
         environment: {
           ARTICLES_TABLE: props.articlesTable.tableName,
           CONTENT_BUCKET: props.contentBucket.bucketName,
-          DB_SECRET_ARN: props.dbCluster.secret.secretArn,
+          DSQL_CLUSTER_ID: props.dsqlClusterId,
         },
       },
     );
@@ -45,8 +36,6 @@ export class CollectorConstruct extends Construct {
     // Grant permissions
     props.articlesTable.grantReadWriteData(orchestratorFunction);
     props.contentBucket.grantReadWrite(orchestratorFunction);
-    props.dbCluster.secret.grantRead(orchestratorFunction);
-    props.dbCluster.connections.allowDefaultPortFrom(orchestratorFunction);
 
     // EventBridge Schedule (every 15 minutes)
     new events.Rule(this, 'CollectionSchedule', {

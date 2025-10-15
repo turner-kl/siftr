@@ -5,20 +5,17 @@ import * as authorizers from 'aws-cdk-lib/aws-apigatewayv2-authorizers';
 import * as integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import type * as cognito from 'aws-cdk-lib/aws-cognito';
 import type * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import type * as rds from 'aws-cdk-lib/aws-rds';
 import type * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
 export interface ApiConstructProps {
-  vpc: ec2.IVpc;
   userPool: cognito.UserPool;
   articlesTable: dynamodb.Table;
   interactionsTable: dynamodb.Table;
   cacheTable: dynamodb.Table;
   contentBucket: s3.Bucket;
-  dbCluster: rds.DatabaseCluster;
+  dsqlClusterId: string;
 }
 
 export class ApiConstruct extends Construct {
@@ -27,11 +24,6 @@ export class ApiConstruct extends Construct {
 
   constructor(scope: Construct, id: string, props: ApiConstructProps) {
     super(scope, id);
-
-    // Verify database secret exists
-    if (!props.dbCluster.secret) {
-      throw new Error('Database cluster secret is required');
-    }
 
     // Lambda Web Adapter Layer (ARM64)
     const lambdaAdapterLayerArn = `arn:aws:lambda:${cdk.Stack.of(this).region}:753240598075:layer:LambdaAdapterLayerArm64:25`;
@@ -42,6 +34,7 @@ export class ApiConstruct extends Construct {
     );
 
     // Lambda function (Node.js runtime + ZIP package)
+    // Note: DSQL doesn't require VPC, so Lambda runs without VPC
     this.apiFunction = new lambda.Function(this, 'ApiFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,
       handler: 'run.sh',
@@ -59,10 +52,6 @@ export class ApiConstruct extends Construct {
         },
       ),
       layers: [lambdaAdapterLayer],
-      vpc: props.vpc,
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-      },
       memorySize: 512,
       timeout: cdk.Duration.seconds(30),
       architecture: lambda.Architecture.ARM_64,
@@ -81,7 +70,7 @@ export class ApiConstruct extends Construct {
         INTERACTIONS_TABLE: props.interactionsTable.tableName,
         CACHE_TABLE: props.cacheTable.tableName,
         CONTENT_BUCKET: props.contentBucket.bucketName,
-        DB_SECRET_ARN: props.dbCluster.secret.secretArn,
+        DSQL_CLUSTER_ID: props.dsqlClusterId,
       },
     });
 
@@ -90,8 +79,6 @@ export class ApiConstruct extends Construct {
     props.interactionsTable.grantReadWriteData(this.apiFunction);
     props.cacheTable.grantReadWriteData(this.apiFunction);
     props.contentBucket.grantReadWrite(this.apiFunction);
-    props.dbCluster.secret.grantRead(this.apiFunction);
-    props.dbCluster.connections.allowDefaultPortFrom(this.apiFunction);
 
     // HTTP API Gateway
     const httpApi = new apigateway.HttpApi(this, 'HttpApi', {

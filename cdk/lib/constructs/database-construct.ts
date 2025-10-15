@@ -1,22 +1,18 @@
 import * as cdk from 'aws-cdk-lib';
+import * as dsql from 'aws-cdk-lib/aws-dsql';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as rds from 'aws-cdk-lib/aws-rds';
-import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
-export interface DatabaseConstructProps {
-  vpc: ec2.IVpc;
-}
+export type DatabaseConstructProps = Record<string, never>;
 
 export class DatabaseConstruct extends Construct {
   public readonly articlesTable: dynamodb.Table;
   public readonly interactionsTable: dynamodb.Table;
   public readonly cacheTable: dynamodb.Table;
-  public readonly dbCluster: rds.DatabaseCluster;
-  public readonly dbSecret: secretsmanager.ISecret;
+  public readonly dsqlCluster: dsql.CfnCluster;
+  public readonly dsqlClusterId: string;
 
-  constructor(scope: Construct, id: string, props: DatabaseConstructProps) {
+  constructor(scope: Construct, id: string, _props: DatabaseConstructProps) {
     super(scope, id);
 
     // DynamoDB Tables
@@ -108,63 +104,24 @@ export class DatabaseConstruct extends Construct {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    // Aurora Serverless v2 (DSQL alternative)
-    // Note: Aurora DSQL is not yet available in CDK, using Serverless v2 instead
-
-    // DB Security Group
-    const dbSecurityGroup = new ec2.SecurityGroup(this, 'DBSecurityGroup', {
-      vpc: props.vpc,
-      description: 'Security group for Aurora database',
-      allowAllOutbound: true,
-    });
-
-    dbSecurityGroup.addIngressRule(
-      ec2.Peer.ipv4(props.vpc.vpcCidrBlock),
-      ec2.Port.tcp(5432),
-      'Allow PostgreSQL access from VPC',
-    );
-
-    // DB Credentials
-    const dbCredentials = rds.Credentials.fromGeneratedSecret('postgres', {
-      secretName: 'siftr/db/credentials',
-    });
-
-    // Aurora Cluster
-    this.dbCluster = new rds.DatabaseCluster(this, 'DBCluster', {
-      engine: rds.DatabaseClusterEngine.auroraPostgres({
-        version: rds.AuroraPostgresEngineVersion.VER_16_4,
-      }),
-      credentials: dbCredentials,
-      defaultDatabaseName: 'siftr',
-      vpc: props.vpc,
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-      },
-      securityGroups: [dbSecurityGroup],
-      writer: rds.ClusterInstance.serverlessV2('writer', {
-        autoMinorVersionUpgrade: true,
-      }),
-      readers: [
-        rds.ClusterInstance.serverlessV2('reader1', {
-          scaleWithWriter: true,
-          autoMinorVersionUpgrade: true,
-        }),
+    // Aurora DSQL Cluster
+    // Note: DSQL is serverless and doesn't require VPC, security groups, or manual scaling
+    this.dsqlCluster = new dsql.CfnCluster(this, 'DSQLCluster', {
+      deletionProtectionEnabled: true,
+      tags: [
+        {
+          key: 'Name',
+          value: 'siftr-dsql-cluster',
+        },
+        {
+          key: 'Environment',
+          value: cdk.Stack.of(this).stackName,
+        },
       ],
-      serverlessV2MinCapacity: 0.5,
-      serverlessV2MaxCapacity: 2,
-      backup: {
-        retention: cdk.Duration.days(7),
-        preferredWindow: '03:00-04:00',
-      },
-      cloudwatchLogsExports: ['postgresql'],
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
-    // Verify that the database secret was created
-    if (!this.dbCluster.secret) {
-      throw new Error('Database cluster secret was not created');
-    }
-    this.dbSecret = this.dbCluster.secret;
+    // Store cluster ID for use in other constructs
+    this.dsqlClusterId = this.dsqlCluster.ref;
 
     // Outputs
     new cdk.CfnOutput(this, 'ArticlesTableNameOutput', {
@@ -172,14 +129,10 @@ export class DatabaseConstruct extends Construct {
       exportName: 'SiftrArticlesTableName',
     });
 
-    new cdk.CfnOutput(this, 'DBClusterEndpointOutput', {
-      value: this.dbCluster.clusterEndpoint.hostname,
-      exportName: 'SiftrDBClusterEndpoint',
-    });
-
-    new cdk.CfnOutput(this, 'DBSecretArnOutput', {
-      value: this.dbSecret.secretArn,
-      exportName: 'SiftrDBSecretArn',
+    new cdk.CfnOutput(this, 'DSQLClusterIdOutput', {
+      value: this.dsqlClusterId,
+      description: 'Aurora DSQL Cluster ID',
+      exportName: 'SiftrDSQLClusterId',
     });
   }
 }

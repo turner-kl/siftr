@@ -15,28 +15,7 @@ export class SiftrBackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // VPC (optional - for Aurora DSQL if needed)
-    const vpc = new cdk.aws_ec2.Vpc(this, 'VPC', {
-      maxAzs: 2,
-      natGateways: 1,
-      subnetConfiguration: [
-        {
-          name: 'Public',
-          subnetType: cdk.aws_ec2.SubnetType.PUBLIC,
-          cidrMask: 24,
-        },
-        {
-          name: 'Private',
-          subnetType: cdk.aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
-          cidrMask: 24,
-        },
-        {
-          name: 'Isolated',
-          subnetType: cdk.aws_ec2.SubnetType.PRIVATE_ISOLATED,
-          cidrMask: 24,
-        },
-      ],
-    });
+    // Note: Aurora DSQL doesn't require VPC - it's a fully managed serverless database
 
     // Authentication
     const auth = new AuthConstruct(this, 'Auth', {
@@ -46,36 +25,31 @@ export class SiftrBackendStack extends cdk.Stack {
     // Storage
     const storage = new StorageConstruct(this, 'Storage');
 
-    // Database
-    const database = new DatabaseConstruct(this, 'Database', {
-      vpc,
-    });
+    // Database (Aurora DSQL)
+    const database = new DatabaseConstruct(this, 'Database', {});
 
     // API
     const api = new ApiConstruct(this, 'API', {
-      vpc,
       userPool: auth.userPool,
       articlesTable: database.articlesTable,
       interactionsTable: database.interactionsTable,
       cacheTable: database.cacheTable,
       contentBucket: storage.contentBucket,
-      dbCluster: database.dbCluster,
+      dsqlClusterId: database.dsqlClusterId,
     });
 
     // Collector
     new CollectorConstruct(this, 'Collector', {
-      vpc,
       articlesTable: database.articlesTable,
       contentBucket: storage.contentBucket,
-      dbCluster: database.dbCluster,
+      dsqlClusterId: database.dsqlClusterId,
     });
 
     // Analyzer
     new AnalyzerConstruct(this, 'Analyzer', {
-      vpc,
       articlesTable: database.articlesTable,
       contentBucket: storage.contentBucket,
-      dbCluster: database.dbCluster,
+      dsqlClusterId: database.dsqlClusterId,
     });
 
     // Store values for cross-stack references
