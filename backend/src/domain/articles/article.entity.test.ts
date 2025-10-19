@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { UserId } from '../types';
-import { createArticleId } from '../valueObjects/articleId';
+import { createArticleId } from './articleId.valueObject';
 import {
   type Article,
   calculatePriorityScore,
@@ -8,7 +8,7 @@ import {
   isArticleAnalyzed,
   isArticleExpired,
   updateAnalysisResult,
-} from './article';
+} from './article.entity';
 
 describe('Article Domain Model', () => {
   const testUserId = '123e4567-e89b-12d3-a456-426614174000' as UserId;

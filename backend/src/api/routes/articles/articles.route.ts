@@ -1,6 +1,6 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { ArticleApplicationService } from '../../../application/articleService';
-import { DynamoDBArticleRepository } from '../../../infrastructure/db/dynamodb-article-repository';
+import { DynamoDBArticleRepository } from '../../../infrastructure/db/dynamodbArticleRepository';
 import { InMemoryArticleRepository } from '../../../infrastructure/db/inMemoryArticleRepository';
 import { InMemoryUserRepository } from '../../../infrastructure/db/inMemoryUserRepository';
 import type { AuthUser } from '../../middleware/auth';

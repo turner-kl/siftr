@@ -3,8 +3,8 @@
  */
 
 import { NotFoundError, type Result, type ValidationError, err, ok } from '../../core/result';
-import type { User } from '../../domain/entities/user';
-import type { UserRepository } from '../../domain/repositories/user-repository';
+import type { User } from '../../domain/users/user.entity';
+import type { UserRepository } from '../../domain/users/user.repository';
 import type { UserId } from '../../domain/types';
 
 export class InMemoryUserRepository implements UserRepository {

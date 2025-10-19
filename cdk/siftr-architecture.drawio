@@ -1,0 +1,425 @@
+<mxfile host="app.diagrams.net" modified="2025-10-19T00:00:00.000Z" agent="Claude Code" version="24.7.17">
+  <diagram name="Siftr Architecture" id="aws-architecture">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="Siftr - AWS Architecture (CDK)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="600" y="20" width="400" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Frontend Stack -->
+        <mxCell id="frontend-stack" value="Frontend Stack" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#4CAF50;strokeWidth=2;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="100" width="680" height="340" as="geometry" />
+        </mxCell>
+
+        <!-- CloudFront -->
+        <mxCell id="cloudfront" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.cloudfront_distribution;" vertex="1" parent="1">
+          <mxGeometry x="140" y="160" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="cloudfront-label" value="CloudFront&#xa;Distribution" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="129" y="245" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lambda (Frontend) -->
+        <mxCell id="lambda-frontend" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.lambda_function;" vertex="1" parent="1">
+          <mxGeometry x="340" y="160" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda-frontend-label" value="Lambda&#xa;(Next.js + LWA)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="329" y="245" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- S3 Static Assets -->
+        <mxCell id="s3-assets" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7AA116;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.s3_bucket;" vertex="1" parent="1">
+          <mxGeometry x="140" y="340" width="75" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="s3-assets-label" value="S3&#xa;Static Assets" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="127.5" y="425" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Function URL -->
+        <mxCell id="function-url" value="Function URL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#FF9800;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="540" y="180" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Backend Stack -->
+        <mxCell id="backend-stack" value="Backend Stack" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#2196F3;strokeWidth=2;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="840" y="100" width="680" height="740" as="geometry" />
+        </mxCell>
+
+        <!-- API Gateway -->
+        <mxCell id="api-gateway" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.api_gateway;" vertex="1" parent="1">
+          <mxGeometry x="900" y="160" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="api-gateway-label" value="API Gateway&#xa;HTTP API" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="889" y="245" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lambda (API) -->
+        <mxCell id="lambda-api" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.lambda_function;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="160" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda-api-label" value="Lambda&#xa;API (Hono)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1089" y="245" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Cognito -->
+        <mxCell id="cognito" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#DD344C;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.cognito;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="160" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="cognito-label" value="Cognito&#xa;User Pool" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1289" y="245" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- DynamoDB -->
+        <mxCell id="dynamodb" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#4D27AA;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.dynamodb;" vertex="1" parent="1">
+          <mxGeometry x="900" y="360" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="dynamodb-label" value="DynamoDB&#xa;(Articles, Interactions, Cache)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="859" y="445" width="160" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Aurora DSQL -->
+        <mxCell id="aurora-dsql" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#4D27AA;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.aurora_instance;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="360" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="aurora-dsql-label" value="Aurora DSQL&#xa;Cluster" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1089" y="445" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- S3 Content -->
+        <mxCell id="s3-content" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7AA116;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.s3_bucket;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="360" width="75" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="s3-content-label" value="S3&#xa;Content Bucket" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1287.5" y="445" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lambda Collector -->
+        <mxCell id="lambda-collector" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.lambda_function;" vertex="1" parent="1">
+          <mxGeometry x="900" y="560" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda-collector-label" value="Lambda&#xa;Collector" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="889" y="645" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- EventBridge -->
+        <mxCell id="eventbridge" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.eventbridge;" vertex="1" parent="1">
+          <mxGeometry x="900" y="720" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="eventbridge-label" value="EventBridge&#xa;(15min schedule)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="879" y="805" width="120" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lambda Analyzer -->
+        <mxCell id="lambda-analyzer" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.lambda_function;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="560" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda-analyzer-label" value="Lambda&#xa;Analyzer" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1089" y="645" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- SQS -->
+        <mxCell id="sqs" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.sqs;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="720" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="sqs-label" value="SQS&#xa;Analysis Queue" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1089" y="805" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- DynamoDB Streams -->
+        <mxCell id="dynamodb-streams" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#4D27AA;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.dynamodb_stream;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="560" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="dynamodb-streams-label" value="DynamoDB&#xa;Streams" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1289" y="645" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- User -->
+        <mxCell id="user" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.user;" vertex="1" parent="1">
+          <mxGeometry x="40" y="920" width="78" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="user-label" value="User" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="39" y="1005" width="80" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Connections -->
+
+        <!-- User to CloudFront -->
+        <mxCell id="conn1" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#1976D2;" edge="1" parent="1" source="user" target="cloudfront">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="79" y="900" />
+              <mxPoint x="79" y="199" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn1-label" value="HTTPS" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#1976D2;fontStyle=1;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="conn1">
+          <mxGeometry x="-0.8" y="2" relative="1" as="geometry">
+            <mxPoint x="15" y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- CloudFront to Lambda Frontend -->
+        <mxCell id="conn2" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;" edge="1" parent="1" source="cloudfront" target="lambda-frontend">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- CloudFront to S3 Assets -->
+        <mxCell id="conn3" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;dashed=1;" edge="1" parent="1" source="cloudfront" target="s3-assets">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn3-label" value="Static assets" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="conn3">
+          <mxGeometry x="0.1" y="1" relative="1" as="geometry">
+            <mxPoint x="-1" y="-5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Lambda Frontend to Function URL -->
+        <mxCell id="conn4" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="lambda-frontend" target="function-url">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Function URL to API Gateway -->
+        <mxCell id="conn5" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;strokeColor=#1976D2;" edge="1" parent="1" source="function-url" target="api-gateway">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn5-label" value="API calls" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="conn5">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint x="10" y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- API Gateway to Lambda API -->
+        <mxCell id="conn6" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;" edge="1" parent="1" source="api-gateway" target="lambda-api">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- API Gateway to Cognito -->
+        <mxCell id="conn7" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;dashed=1;" edge="1" parent="1" source="api-gateway" target="cognito">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1200" y="199" />
+              <mxPoint x="1200" y="199" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn7-label" value="Auth" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="conn7">
+          <mxGeometry x="0.1" y="1" relative="1" as="geometry">
+            <mxPoint x="-5" y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Lambda API to DynamoDB -->
+        <mxCell id="conn8" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;" edge="1" parent="1" source="lambda-api" target="dynamodb">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1139" y="300" />
+              <mxPoint x="939" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Lambda API to Aurora DSQL -->
+        <mxCell id="conn9" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;" edge="1" parent="1" source="lambda-api" target="aurora-dsql">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Lambda API to S3 Content -->
+        <mxCell id="conn10" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;" edge="1" parent="1" source="lambda-api" target="s3-content">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1139" y="300" />
+              <mxPoint x="1338" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- EventBridge to Lambda Collector -->
+        <mxCell id="conn11" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;" edge="1" parent="1" source="eventbridge" target="lambda-collector">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn11-label" value="Every 15min" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="conn11">
+          <mxGeometry x="0.1" y="1" relative="1" as="geometry">
+            <mxPoint x="-1" y="5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Lambda Collector to DynamoDB -->
+        <mxCell id="conn12" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;dashed=1;" edge="1" parent="1" source="lambda-collector" target="dynamodb">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="939" y="500" />
+              <mxPoint x="860" y="500" />
+              <mxPoint x="860" y="399" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn12-label" value="Write articles" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="conn12">
+          <mxGeometry x="0.1" y="1" relative="1" as="geometry">
+            <mxPoint x="25" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Lambda Collector to S3 -->
+        <mxCell id="conn13" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;dashed=1;" edge="1" parent="1" source="lambda-collector" target="s3-content">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1240" y="599" />
+              <mxPoint x="1240" y="399" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- DynamoDB to DynamoDB Streams -->
+        <mxCell id="conn14" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;" edge="1" parent="1" source="dynamodb" target="dynamodb-streams">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1040" y="399" />
+              <mxPoint x="1040" y="520" />
+              <mxPoint x="1260" y="520" />
+              <mxPoint x="1260" y="599" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn14-label" value="Stream" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="conn14">
+          <mxGeometry x="0.1" y="1" relative="1" as="geometry">
+            <mxPoint x="25" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- DynamoDB Streams to Lambda Analyzer -->
+        <mxCell id="conn15" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;" edge="1" parent="1" source="dynamodb-streams" target="lambda-analyzer">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn15-label" value="New articles" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="conn15">
+          <mxGeometry x="0.1" y="1" relative="1" as="geometry">
+            <mxPoint x="5" y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- SQS to Lambda Analyzer -->
+        <mxCell id="conn16" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;" edge="1" parent="1" source="sqs" target="lambda-analyzer">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Lambda Analyzer to DynamoDB -->
+        <mxCell id="conn17" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;dashed=1;" edge="1" parent="1" source="lambda-analyzer" target="dynamodb">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1060" y="599" />
+              <mxPoint x="1060" y="500" />
+              <mxPoint x="939" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn17-label" value="Update analysis" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="conn17">
+          <mxGeometry x="0.1" y="1" relative="1" as="geometry">
+            <mxPoint x="-40" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Lambda Analyzer to S3 -->
+        <mxCell id="conn18" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;dashed=1;" edge="1" parent="1" source="lambda-analyzer" target="s3-content">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="600" as="sourcePoint" />
+            <mxPoint x="450" y="550" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1220" y="599" />
+              <mxPoint x="1220" y="500" />
+              <mxPoint x="1338" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="conn18-label" value="Read content" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;labelBackgroundColor=#FFFFFF;" vertex="1" connectable="0" parent="conn18">
+          <mxGeometry x="0.1" y="1" relative="1" as="geometry">
+            <mxPoint x="-20" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend" value="Legend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF9800;strokeWidth=2;fontSize=14;fontStyle=1;verticalAlign=top;align=left;spacingLeft=10;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="80" y="500" width="680" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-line1" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="120" y="550" as="sourcePoint" />
+            <mxPoint x="200" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-label1" value="Synchronous invocation / Direct access" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="210" y="535" width="240" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-line2" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="120" y="590" as="sourcePoint" />
+            <mxPoint x="200" y="590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-label2" value="Asynchronous / Data flow" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="210" y="575" width="240" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-note1" value="• Lambda Web Adapter (LWA) runs Next.js in Lambda" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="480" y="535" width="260" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-note2" value="• Aurora DSQL: Serverless, VPC-less PostgreSQL" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="480" y="565" width="260" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-note3" value="• All Lambdas run without VPC configuration" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="480" y="595" width="260" height="30" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

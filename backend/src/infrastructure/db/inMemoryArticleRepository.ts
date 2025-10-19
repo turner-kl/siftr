@@ -3,13 +3,13 @@
  */
 
 import { NotFoundError, type Result, type ValidationError, err, ok } from '../../core/result';
-import type { Article } from '../../domain/entities/article';
+import type { Article } from '../../domain/articles/article.entity';
 import type {
   ArticleRepository,
   FindArticlesResult,
   FindByUserIdOptions,
   PaginationOptions,
-} from '../../domain/repositories/article-repository';
+} from '../../domain/articles/article.repository';
 import type { ArticleId, Category, UserId } from '../../domain/types';
 
 export class InMemoryArticleRepository implements ArticleRepository {

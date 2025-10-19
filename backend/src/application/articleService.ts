@@ -9,15 +9,15 @@ import type {
   Article,
   UserProfile as ArticleUserProfile,
   CreateArticleParams,
-} from '../domain/entities/article';
+} from '../domain/articles/article.entity';
 import {
   calculatePriorityScore,
   createUninitializedArticle,
   isArticleAnalyzed,
   updateAnalysisResult,
-} from '../domain/entities/article';
-import type { ArticleRepository } from '../domain/repositories/article-repository';
-import type { UserRepository } from '../domain/repositories/user-repository';
+} from '../domain/articles/article.entity';
+import type { ArticleRepository } from '../domain/articles/article.repository';
+import type { UserRepository } from '../domain/users/user.repository';
 import type { ArticleId, Category, UserId } from '../domain/types';
 
 /**

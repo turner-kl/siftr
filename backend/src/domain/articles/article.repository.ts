@@ -3,7 +3,7 @@
  */
 
 import type { NotFoundError, Result, ValidationError } from '../../core/result';
-import type { Article } from '../entities/article';
+import type { Article } from './article.entity';
 import type { ArticleId, Category, UserId } from '../types';
 
 /**

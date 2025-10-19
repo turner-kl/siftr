@@ -3,7 +3,7 @@
  */
 
 import type { NotFoundError, Result, ValidationError } from '../../core/result';
-import type { User } from '../entities/user';
+import type { User } from './user.entity';
 import type { UserId } from '../types';
 
 /**

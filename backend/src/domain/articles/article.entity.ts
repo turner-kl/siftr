@@ -16,8 +16,8 @@ import type {
   UserId,
 } from '../types';
 import { TECHNICAL_LEVELS } from '../types';
-import { createArticleId } from '../valueObjects/articleId';
-import { normalizeToPriorityScore } from '../valueObjects/priorityScore';
+import { createArticleId } from './articleId.valueObject';
+import { normalizeToPriorityScore } from './priorityScore.valueObject';
 
 /**
  * Article Entity Interface
