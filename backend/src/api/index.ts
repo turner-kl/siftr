@@ -1,47 +1,20 @@
 import { serve } from '@hono/node-server';
-import { Hono } from 'hono';
+import { swaggerUI } from '@hono/swagger-ui';
+import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { authMiddleware } from './middleware/auth';
-import { articlesRouter } from './routes/articles';
-import { userRouter } from './routes/user';
-
-// Services and Repositories
-import { ArticleApplicationService } from '../application/articleService';
-import { DynamoDBArticleRepository } from '../infrastructure/db/dynamodb-article-repository';
-import { InMemoryArticleRepository } from '../infrastructure/db/inMemoryArticleRepository';
-import { InMemoryUserRepository } from '../infrastructure/db/inMemoryUserRepository';
+import type { AuthUser } from './middleware/auth';
+import { articlesRouter } from './routes/articles/articles.route';
+import { meRouter } from './routes/me/me.route';
 
 // Types for Hono context
 type Variables = {
-  user: {
-    sub: string;
-    email: string;
-  };
-  articleService: ArticleApplicationService;
+  user: AuthUser;
 };
 
-const app = new Hono<{ Variables: Variables }>();
-
-// Initialize repositories
-const isDevelopment = process.env.NODE_ENV !== 'production';
-const useInMemory = process.env.USE_IN_MEMORY === 'true' || isDevelopment;
-
-const articleRepository = useInMemory
-  ? new InMemoryArticleRepository()
-  : new DynamoDBArticleRepository();
-
-const userRepository = useInMemory ? new InMemoryUserRepository() : new InMemoryUserRepository(); // TODO: Replace with DynamoDBUserRepository when implemented
-
-// Initialize services
-const articleService = new ArticleApplicationService(articleRepository, userRepository);
-
-// Dependency Injection Middleware
-app.use('*', async (c, next) => {
-  c.set('articleService', articleService);
-  await next();
-});
+const app = new OpenAPIHono<{ Variables: Variables }>();
 
 // Middleware
 app.use('*', logger());
@@ -56,6 +29,9 @@ app.use(
 
 // Health check (no auth required)
 app.get('/health', (c) => {
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+  const useInMemory = process.env.USE_IN_MEMORY === 'true' || isDevelopment;
+
   return c.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -67,7 +43,26 @@ app.get('/health', (c) => {
 // API routes (with auth)
 app.use('/api/*', authMiddleware);
 app.route('/api/articles', articlesRouter);
-app.route('/api/user', userRouter);
+app.route('/api/me', meRouter);
+
+// OpenAPI documentation endpoint
+app.doc('/doc', {
+  openapi: '3.0.0',
+  info: {
+    title: 'Siftr API',
+    version: '0.1.0',
+    description: 'AI駆動型パーソナライズド情報キュレーションシステムのAPI',
+  },
+  servers: [
+    {
+      url: process.env.API_URL || 'http://localhost:3001',
+      description: process.env.NODE_ENV !== 'production' ? 'ローカル開発環境' : '本番環境',
+    },
+  ],
+});
+
+// Swagger UI
+app.get('/ui', swaggerUI({ url: '/doc' }));
 
 // Error handler
 app.onError((err, c) => {
@@ -89,8 +84,10 @@ app.notFound((c) => {
 // For local development
 if (process.env.NODE_ENV !== 'production') {
   const port = Number.parseInt(process.env.PORT || '3001', 10);
+  const useInMemory = process.env.USE_IN_MEMORY === 'true' || true; // isDevelopment
   console.log(`🚀 Server starting on http://localhost:${port}`);
   console.log(`📦 Using ${useInMemory ? 'in-memory' : 'DynamoDB'} repository`);
+  console.log(`📚 API documentation available at http://localhost:${port}/ui`);
   serve({
     fetch: app.fetch,
     port,

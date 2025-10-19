@@ -3,8 +3,18 @@
     "serena",
     "context7"
   ],
-  "statusLine": {
-    "type": "command",
-    "command": "npx ccusage statusline"
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$TOOL_INPUT\" =~ backend/.*\\.(ts|js|json)$ ]]; then cd backend && npm run format:fix \"$TOOL_INPUT\" 2>/dev/null || true; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }
