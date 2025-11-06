@@ -8,6 +8,7 @@ import { authMiddleware } from './middleware/auth';
 import type { AuthUser } from './middleware/auth';
 import { articlesRouter } from './routes/articles/articles.route';
 import { meRouter } from './routes/me/me.route';
+import { rpcDemoRouter } from './routes/rpc-demo';
 
 // Types for Hono context
 type Variables = {
@@ -44,6 +45,7 @@ app.get('/health', (c) => {
 app.use('/api/*', authMiddleware);
 app.route('/api/articles', articlesRouter);
 app.route('/api/me', meRouter);
+app.route('/api/rpc-demo', rpcDemoRouter);
 
 // OpenAPI documentation endpoint
 app.doc('/doc', {
@@ -96,3 +98,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 // For Lambda Web Adapter
 export default app;
+
+// Export app type for RPC client
+export type AppType = typeof app;
