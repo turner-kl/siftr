@@ -3,6 +3,12 @@
   "version": "0.1.0",
   "description": "siftr backend API and infrastructure",
   "type": "module",
+  "exports": {
+    "./client": {
+      "types": "./src/api/index.ts",
+      "default": "./src/api/index.ts"
+    }
+  },
   "scripts": {
     "dev": "tsx watch src/api/index.ts",
     "dev:docker": "docker compose up",
@@ -27,7 +33,7 @@
     "@hono/zod-openapi": "^0.18.4",
     "@smithy/node-http-handler": "^3.3.2",
     "camelcase-keys": "^10.0.1",
-    "hono": "^4.10.1",
+    "hono": "^4.10.4",
     "jose": "^5.9.6",
     "neverthrow": "^8.2.0",
     "snakecase-keys": "^9.0.2",

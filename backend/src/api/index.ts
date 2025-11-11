@@ -94,3 +94,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 // For Lambda Web Adapter
 export default app;
+
+// Export AppType for Hono RPC client
+export type AppType = typeof app;
