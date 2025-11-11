@@ -1,90 +1,122 @@
 /**
  * API Layer Schemas for User Profile (/me endpoints)
- * Uses Domain layer schemas as SSOT
- *
- * TODO: camelCase → snake_case変換を実装
- * TODO: ts-case-convert や radash を使って変換層を追加する
+ * Independent from Domain layer schemas with snake_case convention
+ * Conversion handled by toCamelCase/toSnakeCase utilities
  */
 
 import { z } from '@hono/zod-openapi';
 import { categorySchema } from '../../../domain/shared/category.schema';
-import { updateUserProfileParamsSchema } from '../../../domain/users/user.schema';
-
-// Re-export common schemas for backward compatibility
+import { technicalLevelSchema } from '../../../domain/shared/technicalLevel.schema';
 
 // ============================================================================
-// Request bodies (reusing domain schemas)
+// Request bodies (snake_case for API)
 // ============================================================================
 
 /**
- * Update user profile (displayName, settings)
- * TODO: snake_case変換を追加
+ * Update user profile (display_name, settings)
+ * API layer schema with snake_case keys
  */
 export const UpdateProfileSchema = z
   .object({
-    displayName: z.string().optional(),
+    display_name: z.string().optional(),
     settings: z.record(z.unknown()).optional(),
   })
   .openapi({
     description: 'ユーザープロフィール更新',
     example: {
-      displayName: '田中太郎',
+      display_name: '田中太郎',
       settings: {},
     },
   });
 
 /**
- * Update user skill profile
- * Reuses domain schema
- * TODO: snake_case変換を追加
+ * User skill schema (API layer)
  */
-export const UpdateSkillProfilesSchema = updateUserProfileParamsSchema.openapi({
-  description: 'スキルプロフィール更新',
-  example: {
-    primaryCategory: 'technology',
-    skillLevel: 'intermediate',
-    interests: ['AI', 'Web開発'],
-    skills: [{ keyword: 'TypeScript', level: 'advanced' }],
-  },
+export const UserSkillApiSchema = z.object({
+  keyword: z.string(),
+  level: technicalLevelSchema,
 });
 
 /**
- * User preferences (placeholder for future implementation)
- * TODO: Define in domain layer
- * TODO: snake_case変換を追加
+ * Update user skill profile
+ * Independent API schema with snake_case keys
+ */
+export const UpdateSkillProfilesSchema = z
+  .object({
+    primary_category: categorySchema.optional(),
+    skill_level: technicalLevelSchema.optional(),
+    interests: z.array(z.string()).optional(),
+    skills: z.array(UserSkillApiSchema).optional(),
+  })
+  .openapi({
+    description: 'スキルプロフィール更新',
+    example: {
+      primary_category: 'technology',
+      skill_level: 'intermediate',
+      interests: ['AI', 'Web開発'],
+      skills: [{ keyword: 'TypeScript', level: 'advanced' }],
+    },
+  });
+
+/**
+ * User preferences (API layer schema)
  */
 export const UpdatePreferencesSchema = z
   .object({
-    notificationEnabled: z.boolean().optional(),
-    emailDigestFrequency: z.enum(['daily', 'weekly', 'never']).optional(),
-    defaultCategory: z.string().optional(),
-    articlesPerPage: z.number().int().min(10).max(100).optional(),
-    languagePreference: z.enum(['ja', 'en', 'both']).optional(),
+    notification_enabled: z.boolean().optional(),
+    email_digest_frequency: z.enum(['daily', 'weekly', 'never']).optional(),
+    default_category: z.string().optional(),
+    articles_per_page: z.number().int().min(10).max(100).optional(),
+    language_preference: z.enum(['ja', 'en', 'both']).optional(),
   })
   .openapi({
     description: 'ユーザー設定',
     example: {
-      notificationEnabled: true,
-      emailDigestFrequency: 'daily',
-      defaultCategory: 'technology',
-      articlesPerPage: 20,
-      languagePreference: 'ja',
+      notification_enabled: true,
+      email_digest_frequency: 'daily',
+      default_category: 'technology',
+      articles_per_page: 20,
+      language_preference: 'ja',
     },
   });
 
 // ============================================================================
-// Response schemas
+// Response schemas (snake_case for API)
 // ============================================================================
 
-export const UserProfileResponseSchema = z.object({
-  user: z.object({
-    userId: z.string().openapi({ example: 'user-123' }),
-    email: z.string().email().openapi({ example: 'user@example.com' }),
-    displayName: z.string().optional().openapi({ example: 'ユーザー名' }),
-  }),
-  skill_profiles: z.array(z.any()).openapi({ description: 'スキルプロフィール' }),
+/**
+ * User object in API responses
+ */
+export const UserApiSchema = z.object({
+  user_id: z.string().openapi({ example: 'user-123' }),
+  email: z.string().email().openapi({ example: 'user@example.com' }),
+  display_name: z.string().optional().openapi({ example: 'ユーザー名' }),
 });
 
+/**
+ * User profile object in API responses
+ */
+export const UserProfileApiSchema = z.object({
+  primary_category: categorySchema.openapi({ example: 'technology' }),
+  skill_level: technicalLevelSchema.openapi({ example: 'intermediate' }),
+  interests: z.array(z.string()).openapi({ example: ['AI', 'Web開発'] }),
+  skills: z.array(UserSkillApiSchema).openapi({
+    example: [{ keyword: 'TypeScript', level: 'advanced' }],
+  }),
+});
+
+/**
+ * User profile response schema
+ */
+export const UserProfileResponseSchema = z.object({
+  user: UserApiSchema,
+  profile: UserProfileApiSchema,
+  settings: z.record(z.unknown()).openapi({ example: {} }),
+});
+
+/**
+ * User preferences response schema
+ */
 export const PreferencesResponseSchema = z.object({
   notification_enabled: z.boolean().openapi({ example: true }),
   email_digest_frequency: z.enum(['daily', 'weekly', 'never']).openapi({ example: 'daily' }),

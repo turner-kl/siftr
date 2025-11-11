@@ -7,7 +7,8 @@ import {
   UpdateSkillProfilesSchema,
   UserProfileResponseSchema,
 } from './me.schema';
-import {SuccessResponseSchema, ErrorResponseSchema} from '../../schemas/common.schema'
+import { ErrorResponseSchema, SuccessResponseSchema } from '../../schemas/common.schema';
+// import { toCamelCase, toSnakeCase } from '../../utils/caseConversion';  // TODO: Enable when implementing
 
 export const meRouter = new OpenAPIHono<{ Variables: { user: AuthUser } }>();
 
@@ -39,15 +40,24 @@ meRouter.openapi(getUserProfileRoute, async (c) => {
 
   // TODO: Implement user repository call
   // const user = await userRepository.findByCognitoSub(authUser.sub);
+  // Convert Domain (camelCase) → API (snake_case)
+  // return c.json(toSnakeCase({ user, profile: user.profile, settings: user.settings }), 200);
 
+  // Temporary mock response (already in snake_case)
   return c.json(
     {
       user: {
-        userId: authUser.sub,
+        user_id: authUser.sub,
         email: authUser.email,
-        displayName: authUser['cognito:username'] || authUser.sub,
+        display_name: authUser['cognito:username'] || authUser.sub,
       },
-      skill_profiles: [],
+      profile: {
+        primary_category: 'technology',
+        skill_level: 'beginner',
+        interests: [],
+        skills: [],
+      },
+      settings: {},
     },
     200
   );
@@ -91,7 +101,12 @@ const updateProfileRoute = createRoute({
 
 meRouter.openapi(updateProfileRoute, async (c) => {
   // TODO: Implement user update
-  // await userRepository.update(...)
+  // const body = c.req.valid('json');
+  // Convert API (snake_case) → Domain (camelCase)
+  // const domainParams = toCamelCase(body);
+  // const user = await userRepository.findByCognitoSub(authUser.sub);
+  // const updatedUser = updateUserProfile(user, domainParams);
+  // await userRepository.save(updatedUser);
 
   return c.json({ success: true }, 200);
 });
@@ -134,7 +149,12 @@ const updateSkillProfilesRoute = createRoute({
 
 meRouter.openapi(updateSkillProfilesRoute, async (c) => {
   // TODO: Implement skill profiles update
-  // await userSkillProfileRepository.upsert(...)
+  // const body = c.req.valid('json');
+  // Convert API (snake_case) → Domain (camelCase)
+  // const domainParams = toCamelCase(body);
+  // const user = await userRepository.findByCognitoSub(authUser.sub);
+  // const updatedUser = updateUserProfile(user, domainParams);
+  // await userRepository.save(updatedUser);
 
   return c.json({ success: true }, 200);
 });
@@ -210,7 +230,12 @@ const updatePreferencesRoute = createRoute({
 
 meRouter.openapi(updatePreferencesRoute, async (c) => {
   // TODO: Implement preferences update
-  // await userRepository.updateSettings(...)
+  // const body = c.req.valid('json');
+  // Convert API (snake_case) → Domain (camelCase)
+  // const domainParams = toCamelCase(body);
+  // const user = await userRepository.findByCognitoSub(authUser.sub);
+  // const updatedUser = updateUserSettings(user, domainParams);
+  // await userRepository.save(updatedUser);
 
   return c.json({ success: true }, 200);
 });

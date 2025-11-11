@@ -213,6 +213,85 @@ interface UserRecord {
 }
 ```
 
+### 7. API/Domain Schema Separation
+
+**API and Domain layers have independent schemas:**
+
+**Principle:**
+- API layer: snake_case (REST convention)
+- Domain layer: camelCase (TypeScript convention)
+- Conversion: camelcase-keys & snakecase-keys
+
+**Domain Schema (SSOT for business logic):**
+
+```typescript
+// domain/users/user.schema.ts
+export const updateUserProfileParamsSchema = z.object({
+  primaryCategory: categorySchema.optional(),
+  skillLevel: technicalLevelSchema.optional(),
+  interests: z.array(z.string()).optional(),
+  skills: z.array(userSkillSchema).optional(),
+});
+
+export type UpdateUserProfileParams = z.infer<typeof updateUserProfileParamsSchema>;
+```
+
+**API Schema (independent, snake_case):**
+
+```typescript
+// api/routes/me/me.schema.ts
+export const UpdateSkillProfilesSchema = z.object({
+  primary_category: categorySchema.optional(),
+  skill_level: technicalLevelSchema.optional(),
+  interests: z.array(z.string()).optional(),
+  skills: z.array(UserSkillApiSchema).optional(),
+}).openapi({ description: 'スキルプロフィール更新' });
+```
+
+**Conversion Utilities:**
+
+```typescript
+// api/utils/caseConversion.ts
+import camelcaseKeys from 'camelcase-keys';
+import snakecaseKeys from 'snakecase-keys';
+
+export function toCamelCase<T>(obj: T): T {
+  return camelcaseKeys(obj, { deep: true }) as T;
+}
+
+export function toSnakeCase<T>(obj: T): T {
+  return snakecaseKeys(obj, { deep: true }) as T;
+}
+```
+
+**Usage in Routes:**
+
+```typescript
+// api/routes/me/me.route.ts
+import { toCamelCase, toSnakeCase } from '../../utils/caseConversion';
+
+// GET endpoint: Domain → API (toSnakeCase)
+meRouter.openapi(getUserProfileRoute, async (c) => {
+  const user = await userRepository.find(...);
+  return c.json(toSnakeCase({ user, profile: user.profile }), 200);
+});
+
+// PUT endpoint: API → Domain (toCamelCase)
+meRouter.openapi(updateProfileRoute, async (c) => {
+  const body = c.req.valid('json');
+  const domainParams = toCamelCase(body);
+  const updatedUser = updateUserProfile(user, domainParams);
+  await userRepository.save(updatedUser);
+  return c.json({ success: true }, 200);
+});
+```
+
+**Benefits:**
+- ✅ Clean separation of concerns (API vs Domain)
+- ✅ Independent evolution (API versioning, domain refactoring)
+- ✅ REST conventions respected (snake_case in API)
+- ✅ TypeScript conventions respected (camelCase in Domain)
+
 ## Development Workflow
 
 ### 1. Define Domain Schema (SSOT)

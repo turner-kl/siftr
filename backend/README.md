@@ -44,6 +44,8 @@ backend/
 │       ├── middleware/   # Auth, logging, etc.
 │       ├── schemas/      # Common API schemas
 │       │   └── common.schema.ts  # RFC 9457 error schemas
+│       ├── utils/        # API utilities
+│       │   └── caseConversion.ts  # camelCase ↔ snake_case conversion
 │       └── routes/       # HTTP route handlers
 │           └── me/
 │               ├── me.route.ts
@@ -113,6 +115,33 @@ Standardized error format for HTTP APIs:
   "detail": "メールアドレスの形式が正しくありません",
   "errors": [{"field": "email", "message": "無効です"}]
 }
+```
+
+#### 5. API/Domain Schema Separation
+
+**API and Domain layers have independent schemas with automatic conversion:**
+
+```typescript
+// API Schema (snake_case) - Independent definition
+export const UpdateSkillProfilesSchema = z.object({
+  primary_category: categorySchema.optional(),
+  skill_level: technicalLevelSchema.optional(),
+});
+
+// Domain Schema (camelCase) - Business logic SSOT
+export const updateUserProfileParamsSchema = z.object({
+  primaryCategory: categorySchema.optional(),
+  skillLevel: technicalLevelSchema.optional(),
+});
+
+// Conversion utilities (camelcase-keys & snakecase-keys)
+import { toCamelCase, toSnakeCase } from '../../utils/caseConversion';
+
+// Usage in routes
+const body = c.req.valid('json');
+const domainParams = toCamelCase(body);  // API → Domain
+// ...
+return c.json(toSnakeCase(result), 200);  // Domain → API
 ```
 
 ## Local Development
