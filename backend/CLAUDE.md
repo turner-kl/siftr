@@ -10,6 +10,7 @@ This backend follows **DDD (Domain-Driven Design)** and **TDD (Test-Driven Devel
 - Schema-First with Zod (Single Source of Truth)
 - Result type pattern with neverthrow
 - RFC 9457 compliant error responses
+- **Hono RPC + Zod OpenAPI integration** for type-safe API with automatic documentation
 
 ## Project Structure
 
@@ -39,6 +40,104 @@ src/
 │           └── me.schema.ts
 └── types/                # (Reserved for future use)
 ```
+
+## Hono RPC + Zod OpenAPI Integration
+
+This project uses **@hono/zod-openapi** for automatic OpenAPI specification generation while maintaining full type safety through **Hono RPC**.
+
+### Architecture Benefits
+
+1. ✅ **Type-Safe API Client**: Frontend gets full type inference from backend routes
+2. ✅ **Automatic Documentation**: OpenAPI spec at `/doc`, Swagger UI at `/ui`
+3. ✅ **Single Source of Truth**: Zod schemas generate both types and validation
+4. ✅ **Status Code Type Inference**: Different response types per HTTP status
+
+### Backend Setup
+
+```typescript
+// api/index.ts
+import { OpenAPIHono } from '@hono/zod-openapi';
+import { meRouter } from './routes/me/me.route';
+
+const app = new OpenAPIHono<{ Variables: Variables }>();
+
+// ✅ Combine all routes into one variable
+const routes = app.route('/api/me', meRouter);
+
+// ✅ Export complete type for RPC client
+export type AppType = typeof routes;
+```
+
+### Route Definition with OpenAPI
+
+```typescript
+// api/routes/me/me.route.ts
+import { createRoute } from '@hono/zod-openapi';
+
+const getUserProfileRoute = createRoute({
+  method: 'get',
+  path: '/profile',
+  tags: ['Me'],
+  responses: {
+    200: {
+      content: { 'application/json': { schema: UserProfileResponseSchema } },
+      description: 'Success',
+    },
+    404: {
+      content: { 'application/json': { schema: z.object({ error: z.string() }) } },
+      description: 'User not found',
+    },
+  },
+});
+
+meRouter.openapi(getUserProfileRoute, async (c) => {
+  // ✅ Always use explicit status codes for RPC type inference
+  if (!user) {
+    return c.json({ error: 'User not found' }, 404); // ✅ Explicit 404
+  }
+  return c.json({ user, profile }, 200); // ✅ Explicit 200
+});
+```
+
+### Frontend RPC Client
+
+```typescript
+// frontend/src/lib/api.ts
+import { hc } from 'hono/client';
+import type { AppType } from '../../../backend/src/api';
+
+export const apiClient = hc<AppType>(API_BASE_URL);
+
+// Usage with status code handling
+const res = await apiClient.api.me.profile.$get();
+if (res.status === 404) {
+  const error = await res.json(); // Type: { error: string }
+}
+if (res.ok) {
+  const data = await res.json(); // Type: UserProfileResponse
+}
+```
+
+### Important: Status Code Best Practices
+
+**✅ DO**: Use explicit status codes with `c.json()`
+```typescript
+return c.json({ error: 'not found' }, 404); // ✅ Type inference works
+return c.json({ user }, 200); // ✅ Type inference works
+```
+
+**❌ DON'T**: Use `c.notFound()`
+```typescript
+return c.notFound(); // ❌ Breaks RPC type inference
+```
+
+**Reason**: `c.notFound()` returns a generic response that can't be properly typed on the client side.
+
+### Documentation & Testing
+
+- **OpenAPI Spec**: `http://localhost:3001/doc`
+- **Swagger UI**: `http://localhost:3001/ui`
+- **See Full Guide**: `docs/hono-rpc-openapi-integration.md`
 
 ## Key Principles
 

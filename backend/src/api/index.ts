@@ -41,7 +41,7 @@ app.get('/health', (c) => {
 
 // API routes (with auth)
 app.use('/api/*', authMiddleware);
-app.route('/api/me', meRouter);
+const routes = app.route('/api/me', meRouter);
 
 // OpenAPI documentation endpoint
 app.doc('/doc', {
@@ -95,5 +95,5 @@ if (process.env.NODE_ENV !== 'production') {
 // For Lambda Web Adapter
 export default app;
 
-// Export AppType for Hono RPC client
-export type AppType = typeof app;
+// Export AppType for Hono RPC client (full app routes with type safety)
+export type AppType = typeof routes;

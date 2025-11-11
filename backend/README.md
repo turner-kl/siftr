@@ -4,11 +4,13 @@ AI-driven personalized information curation system - Backend API
 
 ## Architecture
 
-- **Framework**: Hono (Lambda Web Adapter compatible)
+- **Framework**: Hono with @hono/zod-openapi (Lambda Web Adapter compatible)
 - **Language**: TypeScript
 - **Database**: DynamoDB (future)
 - **Auth**: AWS Cognito
 - **Infrastructure**: AWS CDK (future)
+- **API Documentation**: OpenAPI 3.0 with Swagger UI
+- **Type Safety**: Hono RPC client for frontend integration
 
 ## Design Principles
 
@@ -20,6 +22,7 @@ This backend follows **Domain-Driven Design (DDD)** and **Test-Driven Developmen
 - Schema-First with Zod (Single Source of Truth)
 - Result type pattern with neverthrow
 - RFC 9457 compliant error responses
+- **Hono RPC + Zod OpenAPI** integration for type-safe API with automatic documentation
 
 ### Directory Structure
 
@@ -143,6 +146,64 @@ const domainParams = toCamelCase(body);  // API → Domain
 // ...
 return c.json(toSnakeCase(result), 200);  // Domain → API
 ```
+
+## Hono RPC + Zod OpenAPI Integration
+
+This project combines **Hono RPC** for type-safe API calls with **@hono/zod-openapi** for automatic OpenAPI documentation.
+
+### Benefits
+
+1. ✅ **Full Type Safety**: Frontend gets complete type inference from backend
+2. ✅ **Automatic Documentation**: OpenAPI spec + Swagger UI
+3. ✅ **Single Source of Truth**: Zod schemas for validation and types
+4. ✅ **Status Code Type Inference**: Different response types per status code
+
+### Quick Examples
+
+**Backend Route Definition:**
+```typescript
+import { createRoute } from '@hono/zod-openapi';
+
+const route = createRoute({
+  method: 'get',
+  path: '/profile',
+  responses: {
+    200: { content: { 'application/json': { schema: ProfileSchema } } },
+    404: { content: { 'application/json': { schema: ErrorSchema } } },
+  },
+});
+
+meRouter.openapi(route, async (c) => {
+  if (!user) return c.json({ error: 'Not found' }, 404); // ✅ Explicit 404
+  return c.json({ user }, 200); // ✅ Explicit 200
+});
+```
+
+**Frontend RPC Client:**
+```typescript
+import { hc } from 'hono/client';
+import type { AppType } from '../../../backend/src/api';
+
+const apiClient = hc<AppType>('http://localhost:3001');
+
+// Type-safe API call with status handling
+const res = await apiClient.api.me.profile.$get();
+if (res.status === 404) {
+  const error = await res.json(); // Type: { error: string }
+}
+if (res.ok) {
+  const data = await res.json(); // Type: ProfileResponse
+}
+```
+
+### Documentation URLs
+
+- **Swagger UI**: http://localhost:3001/ui
+- **OpenAPI JSON**: http://localhost:3001/doc
+
+### Full Guide
+
+See `docs/hono-rpc-openapi-integration.md` for comprehensive documentation and best practices.
 
 ## Local Development
 

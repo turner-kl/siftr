@@ -1,5 +1,6 @@
 import { OpenAPIHono, createRoute } from '@hono/zod-openapi';
 import type { AuthUser } from '../../middleware/auth';
+import { ErrorResponseSchema, SuccessResponseSchema } from '../../schemas/common.schema';
 import {
   PreferencesResponseSchema,
   UpdatePreferencesSchema,
@@ -7,7 +8,6 @@ import {
   UpdateSkillProfilesSchema,
   UserProfileResponseSchema,
 } from './me.schema';
-import { ErrorResponseSchema, SuccessResponseSchema } from '../../schemas/common.schema';
 // import { toCamelCase, toSnakeCase } from '../../utils/caseConversion';  // TODO: Enable when implementing
 
 export const meRouter = new OpenAPIHono<{ Variables: { user: AuthUser } }>();
@@ -40,6 +40,9 @@ meRouter.openapi(getUserProfileRoute, async (c) => {
 
   // TODO: Implement user repository call
   // const user = await userRepository.findByCognitoSub(authUser.sub);
+  // if (!user) {
+  //   return c.json({ error: 'User not found' }, 404); // ✅ Explicit 404 for RPC type inference
+  // }
   // Convert Domain (camelCase) → API (snake_case)
   // return c.json(toSnakeCase({ user, profile: user.profile, settings: user.settings }), 200);
 
@@ -59,7 +62,7 @@ meRouter.openapi(getUserProfileRoute, async (c) => {
       },
       settings: {},
     },
-    200
+    200 // ✅ Explicit 200 for RPC type inference
   );
 });
 
@@ -104,11 +107,15 @@ meRouter.openapi(updateProfileRoute, async (c) => {
   // const body = c.req.valid('json');
   // Convert API (snake_case) → Domain (camelCase)
   // const domainParams = toCamelCase(body);
+  // const authUser = c.get('user');
   // const user = await userRepository.findByCognitoSub(authUser.sub);
+  // if (!user) {
+  //   return c.json({ error: 'User not found' }, 404); // ✅ Explicit 404
+  // }
   // const updatedUser = updateUserProfile(user, domainParams);
   // await userRepository.save(updatedUser);
 
-  return c.json({ success: true }, 200);
+  return c.json({ success: true }, 200); // ✅ Explicit 200
 });
 
 // PUT /api/me/skill-profiles
@@ -152,11 +159,15 @@ meRouter.openapi(updateSkillProfilesRoute, async (c) => {
   // const body = c.req.valid('json');
   // Convert API (snake_case) → Domain (camelCase)
   // const domainParams = toCamelCase(body);
+  // const authUser = c.get('user');
   // const user = await userRepository.findByCognitoSub(authUser.sub);
+  // if (!user) {
+  //   return c.json({ error: 'User not found' }, 404); // ✅ Explicit 404
+  // }
   // const updatedUser = updateUserProfile(user, domainParams);
   // await userRepository.save(updatedUser);
 
-  return c.json({ success: true }, 200);
+  return c.json({ success: true }, 200); // ✅ Explicit 200
 });
 
 // GET /api/me/preferences
@@ -233,9 +244,13 @@ meRouter.openapi(updatePreferencesRoute, async (c) => {
   // const body = c.req.valid('json');
   // Convert API (snake_case) → Domain (camelCase)
   // const domainParams = toCamelCase(body);
+  // const authUser = c.get('user');
   // const user = await userRepository.findByCognitoSub(authUser.sub);
+  // if (!user) {
+  //   return c.json({ error: 'User not found' }, 404); // ✅ Explicit 404
+  // }
   // const updatedUser = updateUserSettings(user, domainParams);
   // await userRepository.save(updatedUser);
 
-  return c.json({ success: true }, 200);
+  return c.json({ success: true }, 200); // ✅ Explicit 200
 });
