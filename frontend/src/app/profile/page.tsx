@@ -22,7 +22,7 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        const res = await (apiClient as any).api.me.profile.$get();
+        const res = await apiClient.api.me.profile.$get();
 
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}: ${res.statusText}`);
