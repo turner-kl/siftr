@@ -28,6 +28,7 @@
     "@smithy/node-http-handler": "^3.3.2",
     "hono": "^4.10.1",
     "jose": "^5.9.6",
+    "neverthrow": "^8.2.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

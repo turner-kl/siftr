@@ -101,6 +101,63 @@ All domain types are centralized in `frontend/src/types/article.ts`:
 
 See `frontend/CLAUDE.md` for detailed component architecture and patterns.
 
+## Quality Assurance Workflow
+
+### Pre-Completion Checklist
+
+When you finish implementing a feature or fix, **ALWAYS** run the following verification steps:
+
+#### 1. Backend Verification
+
+```bash
+cd backend
+npm run lint          # Biome linting
+npm run format:fix        # Biome format check
+npm run typecheck     # TypeScript type checking
+npm test              # Run all tests (TDD requirement)
+npm run build         # Verify production build
+```
+
+#### 2. Frontend Verification
+
+```bash
+cd frontend
+npm run lint          # Biome linting
+npm run format:fix        # Biome format check
+npm run typecheck     # TypeScript type checking
+npm run build         # Verify production build
+```
+
+#### 3. Code Review with Specialized Agents
+
+After all static analysis passes, request a code review using the appropriate Claude Code agent:
+
+- **Backend changes**: Use the `code-reviewer` agent focusing on:
+  - DDD/TDD adherence (pure functions, Result types, no exceptions)
+  - Schema-first validation with Zod
+  - Repository pattern and dependency injection
+  - Immutability and type safety
+
+- **Frontend changes**: Use the `react-specialist` or `ui-designer` agent focusing on:
+  - Type-safe filter composition
+  - shadcn/ui design token usage (no hardcoded colors)
+  - WCAG 2.1 AA accessibility compliance
+  - Performance optimization (useMemo, useCallback)
+
+**Example workflow**:
+```
+1. Implement feature
+2. Run all verification commands above
+3. If any checks fail, fix issues and re-run
+4. Once all checks pass, invoke appropriate review agent
+5. Address review feedback
+6. Commit changes
+```
+
+### Integration with CI/CD
+
+The GitHub Actions workflows (`.github/workflows/`) run the same checks automatically on push/PR. Local verification helps catch issues earlier.
+
 ## Branch Strategy
 
 - `main` - Production-ready code

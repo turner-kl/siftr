@@ -1,76 +1,64 @@
 /**
  * User Entity (Domain Model)
+ * Pure functions with Always-Valid Domain Model pattern
+ * - Form validation: handled by Schema at Application layer
+ * - Business rules: handled here with Result type
  */
 
-import { type Result, ValidationError, err, ok } from '../../core/result';
-import type { Category, TechnicalLevel, UserId } from '../types';
+import { type Result, ok } from 'neverthrow';
+import type { ValidationError } from '../../core/errors';
+import type {
+  Category,
+  CreateUserParams,
+  TechnicalLevel,
+  UpdateUserProfileParams,
+  UpdateUserSettingsParams,
+  User,
+  UserId,
+  UserProfile,
+  UserSkill,
+} from './user.schema';
+
+// Re-export types for convenience
+export type {
+  User,
+  UserId,
+  UserProfile,
+  UserSkill,
+  Category,
+  TechnicalLevel,
+  CreateUserParams,
+  UpdateUserProfileParams,
+  UpdateUserSettingsParams,
+};
+
+// ============================================================================
+// UserId Utility Functions
+// ============================================================================
 
 /**
- * User skill
+ * Generate a new random UserId
  */
-export interface UserSkill {
-  readonly keyword: string;
-  readonly level: TechnicalLevel;
+export function generateUserId(): UserId {
+  return crypto.randomUUID() as UserId;
 }
 
-/**
- * User profile
- */
-export interface UserProfile {
-  readonly interests: readonly string[];
-  readonly skills: readonly UserSkill[];
-  readonly primaryCategory: Category;
-  readonly skillLevel: TechnicalLevel;
-}
-
-/**
- * User Entity
- */
-export interface User {
-  readonly userId: UserId;
-  readonly email: string;
-  readonly cognitoSub: string;
-  readonly displayName?: string;
-  readonly profile: UserProfile;
-  readonly createdAt: number;
-  readonly updatedAt: number;
-  readonly settings: Record<string, unknown>;
-}
-
-/**
- * Parameters for creating a user
- */
-export interface CreateUserParams {
-  userId: UserId;
-  email: string;
-  cognitoSub: string;
-  displayName?: string;
-  primaryCategory: Category;
-  skillLevel: TechnicalLevel;
-  interests?: string[];
-  skills?: UserSkill[];
-}
+// ============================================================================
+// Entity Functions
+// ============================================================================
 
 /**
  * Create a new user
+ * Form validation is handled by Schema at Application layer
+ * This function handles business rules only
  */
 export function createUser(params: CreateUserParams): Result<User, ValidationError> {
-  // Validation
-  if (!params.email || !isValidEmail(params.email)) {
-    return err(new ValidationError('有効なメールアドレスが必要です'));
-  }
-
-  if (!params.cognitoSub || params.cognitoSub.trim().length === 0) {
-    return err(new ValidationError('Cognito Subは必須です'));
-  }
-
-  const now = Date.now();
-
-  return ok({
+  // Business rules (none currently, but extensible)
+  const user: User = {
     userId: params.userId,
-    email: params.email.toLowerCase().trim(),
+    email: params.email,
     cognitoSub: params.cognitoSub,
-    displayName: params.displayName?.trim(),
+    displayName: params.displayName,
     profile: {
       primaryCategory: params.primaryCategory,
       skillLevel: params.skillLevel,
@@ -78,44 +66,45 @@ export function createUser(params: CreateUserParams): Result<User, ValidationErr
       skills: params.skills || [],
     },
     settings: {},
-    createdAt: now,
-    updatedAt: now,
-  });
+  };
+
+  return ok(user);
 }
 
 /**
  * Update user profile
+ * Form validation is handled by Schema at Application layer
+ * This function handles business rules only
  */
 export function updateUserProfile(
   user: User,
-  updates: {
-    primaryCategory?: Category;
-    skillLevel?: TechnicalLevel;
-    interests?: string[];
-    skills?: UserSkill[];
-  }
-): User {
-  return {
+  updates: UpdateUserProfileParams
+): Result<User, ValidationError> {
+  // Business rules (none currently, but extensible)
+  const updated: User = {
     ...user,
     profile: {
       ...user.profile,
-      ...updates,
+      primaryCategory: updates.primaryCategory ?? user.profile.primaryCategory,
+      skillLevel: updates.skillLevel ?? user.profile.skillLevel,
+      interests: updates.interests ?? user.profile.interests,
+      skills: updates.skills ?? user.profile.skills,
     },
-    updatedAt: Date.now(),
   };
+
+  return ok(updated);
 }
 
 /**
  * Update user settings
  */
-export function updateUserSettings(user: User, settings: Record<string, unknown>): User {
+export function updateUserSettings(user: User, settings: UpdateUserSettingsParams): User {
   return {
     ...user,
     settings: {
       ...user.settings,
       ...settings,
     },
-    updatedAt: Date.now(),
   };
 }
 
@@ -133,7 +122,6 @@ export function addInterest(user: User, interest: string): User {
       ...user.profile,
       interests: [...user.profile.interests, interest],
     },
-    updatedAt: Date.now(),
   };
 }
 
@@ -147,7 +135,6 @@ export function removeInterest(user: User, interest: string): User {
       ...user.profile,
       interests: user.profile.interests.filter((i) => i !== interest),
     },
-    updatedAt: Date.now(),
   };
 }
 
@@ -163,7 +150,6 @@ export function upsertSkill(user: User, skill: UserSkill): User {
       ...user.profile,
       skills: [...existingSkills, skill],
     },
-    updatedAt: Date.now(),
   };
 }
 
@@ -177,25 +163,14 @@ export function removeSkill(user: User, keyword: string): User {
       ...user.profile,
       skills: user.profile.skills.filter((s) => s.keyword !== keyword),
     },
-    updatedAt: Date.now(),
   };
 }
 
 /**
  * Reconstruct user from persistence layer
+ * Data should be validated by Schema before calling this function
  */
 export function reconstructUser(data: User): Result<User, ValidationError> {
-  if (!data.userId || !data.email) {
-    return err(new ValidationError('UserId and email are required'));
-  }
-
+  // Business rules validation (if any)
   return ok(data);
-}
-
-/**
- * Simple email validation
- */
-function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
 }

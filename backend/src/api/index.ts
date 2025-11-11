@@ -6,7 +6,6 @@ import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { authMiddleware } from './middleware/auth';
 import type { AuthUser } from './middleware/auth';
-import { articlesRouter } from './routes/articles/articles.route';
 import { meRouter } from './routes/me/me.route';
 
 // Types for Hono context
@@ -42,7 +41,6 @@ app.get('/health', (c) => {
 
 // API routes (with auth)
 app.use('/api/*', authMiddleware);
-app.route('/api/articles', articlesRouter);
 app.route('/api/me', meRouter);
 
 // OpenAPI documentation endpoint

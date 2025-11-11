@@ -2,10 +2,11 @@
  * In-Memory User Repository (for testing)
  */
 
-import { NotFoundError, type Result, type ValidationError, err, ok } from '../../core/result';
+import { type Result, err, ok } from 'neverthrow';
+import { NotFoundError, type ValidationError } from '../../core/errors';
 import type { User } from '../../domain/users/user.entity';
 import type { UserRepository } from '../../domain/users/user.repository';
-import type { UserId } from '../../domain/types';
+import type { UserId } from '../../domain/users/user.schema';
 
 export class InMemoryUserRepository implements UserRepository {
   private users: Map<string, User> = new Map();

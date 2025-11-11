@@ -4,512 +4,137 @@
 
 This backend follows **DDD (Domain-Driven Design)** and **TDD (Test-Driven Development)** principles.
 
-**Key Architecture**: Pure function-based domain layer with Result type pattern (NO Zod in domain layer).
+**Key Architecture**:
+- Pure function-based domain layer
+- Always-Valid Domain Model pattern
+- Schema-First with Zod (Single Source of Truth)
+- Result type pattern with neverthrow
+- RFC 9457 compliant error responses
 
 ## Project Structure
 
 ```
 src/
-├── core/                    # Core utilities (Result type, errors)
-│   └── result.ts           # Result<T, E> type and error classes
-├── domain/                 # Domain layer (pure functions, NO classes)
-│   ├── entities/            # Domain entities (pure functions)
-│   │   ├── article.ts     # Article domain logic
-│   │   └── user.ts        # User domain logic
-│   ├── repositories/      # Repository interfaces (abstract)
-│   │   ├── article-repository.ts
-│   │   └── user-repository.ts
-│   ├── services/          # Domain services (pure functions)
-│   ├── valueObjects/      # Value objects with validation
-│   └── types.ts           # Branded types (ArticleId, UserId, etc.)
-├── infrastructure/         # Infrastructure layer (external dependencies)
-│   ├── db/                # Database implementations
-│   │   ├── dynamodb-article-repository.ts    # Production DB
-│   │   ├── inMemoryArticleRepository.ts      # Testing
-│   │   └── inMemoryUserRepository.ts         # Testing
-│   ├── api/               # External API clients
-│   └── external/          # Other external services
-├── application/           # Application layer (use cases)
-│   └── articleService.ts  # Class-based service with DI
+├── core/                    # Core utilities
+│   └── errors.ts           # Domain error classes
+├── domain/                 # Domain layer (pure functions, schemas)
+│   ├── users/             # User aggregate
+│   │   ├── user.schema.ts       # Zod schemas (SSOT)
+│   │   ├── user.entity.ts       # User domain logic
+│   │   └── user.repository.ts   # Repository interface
+│   └── shared/            # Shared value objects
+│       ├── category.schema.ts
+│       └── technicalLevel.schema.ts
+├── infrastructure/         # Infrastructure layer
+│   └── db/                # Database implementations
+│       └── inMemoryUserRepository.ts
 ├── api/                   # Presentation layer (HTTP)
-│   ├── index.ts          # Hono app setup + DI
+│   ├── index.ts          # Hono app setup
 │   ├── middleware/       # Auth, logging, etc.
+│   ├── schemas/          # Common API schemas
+│   │   └── common.schema.ts  # RFC 9457 error schemas
 │   └── routes/           # HTTP route handlers
-└── types/                # Shared types
+│       └── me/
+│           ├── me.route.ts
+│           └── me.schema.ts
+└── types/                # (Reserved for future use)
 ```
 
 ## Key Principles
 
-### 1. Result Type Pattern (NO Exceptions)
+### 1. Always-Valid Domain Model + Result Type
 
-**Never throw exceptions in domain/application layer. Use Result type:**
+**Separation of Concerns:**
+- **Form validation**: Application layer with Schema (`.safeParse()`)
+- **Business rules**: Domain layer with Result type
 
 ```typescript
-import { ok, err, type Result, ValidationError, NotFoundError } from '../core/result';
+// Application Layer (future implementation)
+import { type Result } from 'neverthrow';
+import { createUserParamsSchema } from '../domain/users/user.schema';
+import { createUser } from '../domain/users/user.entity';
 
-// Domain function returning Result
-export function createArticle(params: CreateArticleParams): Result<Article, ValidationError> {
-  // Validation
-  if (!params.title.trim()) {
-    return err(new ValidationError('タイトルは必須です'));
+async function createUserUseCase(input: unknown): Promise<Result<User, ValidationError>> {
+  // ✅ Form validation with Schema
+  const parseResult = createUserParamsSchema.safeParse(input);
+  if (!parseResult.success) {
+    return err(new ValidationError('入力検証エラー'));
   }
 
-  // Create entity
-  const article: Article = {
-    articleId: crypto.randomUUID() as ArticleId,
-    ...params,
-    collectedAt: Date.now(),
+  // ✅ Domain logic (business rules only)
+  const userResult = createUser(parseResult.data);
+  if (!userResult.ok) {
+    return userResult;
+  }
+
+  await userRepo.save(userResult.value);
+  return ok(userResult.value);
+}
+
+// Domain Layer
+export function createUser(params: CreateUserParams): Result<User, ValidationError> {
+  // ✅ NO form validation (Schema guarantees validity)
+  // ✅ Business rules only (if any)
+
+  const user: User = {
+    userId: params.userId,  // Already validated by Schema
+    email: params.email,    // Already transformed by Schema
+    // ...
   };
 
-  return ok(article);
-}
-
-// Consuming Result
-const result = createArticle(params);
-if (!result.ok) {
-  console.error(result.error.message);
-  return;
-}
-const article = result.value; // Type-safe!
-```
-
-### 2. NO Zod in Domain Layer
-
-**Domain layer uses pure TypeScript types and manual validation:**
-
-```typescript
-// ❌ BAD: Zod in domain layer
-export const ArticleSchema = z.object({ ... });
-export type Article = z.infer<typeof ArticleSchema>;
-
-// ✅ GOOD: Pure TypeScript types
-export interface Article {
-  articleId: ArticleId;
-  userId: UserId;
-  title: string;
-  category: Category;
-  priorityScore: PriorityScore;
-  // ...
-}
-
-// ✅ GOOD: Manual validation in factory functions
-export function createArticle(params: CreateArticleParams): Result<Article, ValidationError> {
-  if (!params.title.trim()) {
-    return err(new ValidationError('タイトルは必須です'));
-  }
-  // ...
-  return ok(article);
+  return ok(user);
 }
 ```
 
-**Zod is ONLY used in API layer for HTTP request validation:**
+### 2. Schema-First with Zod (SSOT)
+
+**All types are derived from Zod schemas using `z.infer`:**
 
 ```typescript
-// ✅ GOOD: Zod in API layer (routes)
-const CreateArticleSchema = z.object({
-  url: z.string().url(),
-  title: z.string().min(1),
-  language: z.enum(['ja', 'en']),
+// ✅ GOOD: Zod schema as SSOT
+import { z } from 'zod';
+
+export const userIdSchema = z.string().uuid().brand<'UserId'>();
+export type UserId = z.infer<typeof userIdSchema>;  // ✅ Type from schema
+
+export const userSchema = z.object({
+  userId: userIdSchema,
+  email: z.string().email().transform(s => s.toLowerCase().trim()),
+  displayName: z.string().optional(),
+  profile: userProfileSchema,
+  settings: z.record(z.unknown()),
 });
 
-articlesRouter.post('/manual', async (c) => {
-  const bodyResult = CreateArticleSchema.safeParse(await c.req.json());
-  if (!bodyResult.success) {
-    return c.json({ error: 'Invalid request body' }, 400);
-  }
-  // ...
-});
+export type User = z.infer<typeof userSchema>;  // ✅ Type from schema
 ```
 
-### 3. Pure Functions in Domain Layer
+**Benefits:**
+- ✅ Single Source of Truth
+- ✅ Type and validation always in sync
+- ✅ No duplication between validation and types
 
-**Domain layer contains ONLY pure functions (no classes, no side effects):**
+### 3. neverthrow Direct Usage
+
+**Import neverthrow directly (no wrapper):**
 
 ```typescript
-// ✅ GOOD: Pure function
-export function calculatePriorityScore(
-  article: Article,
-  userProfile: UserProfile
-): Article {
-  let score = 50;
+// ✅ GOOD: Direct import
+import { type Result, err, ok } from 'neverthrow';
+import { ValidationError } from '../../core/errors';
 
-  // Calculate based on category match
-  if (article.category === userProfile.category) {
-    score += 20;
-  }
-
-  // Calculate based on skill level
-  if (article.technicalLevel === userProfile.skillLevel) {
-    score += 15;
-  }
-
-  // Return NEW object (immutable)
-  return {
-    ...article,
-    priorityScore: Math.max(0, Math.min(100, score)) as PriorityScore,
-  };
+export function createUser(params: CreateUserParams): Result<User, ValidationError> {
+  // Business rules
+  const user: User = { ...params };
+  return ok(user);
 }
 
-// ❌ BAD: Mutation
-export function calculatePriorityScore(article: Article): void {
-  article.priorityScore = 75; // Mutates input!
-}
+// ❌ BAD: Don't create wrappers
+// import { type Result, err, ok } from '../core/result';  // Removed!
 ```
 
-### 4. Repository Pattern
-
-**Domain layer defines interfaces, infrastructure layer implements:**
+**Domain Errors (`core/errors.ts`):**
 
 ```typescript
-// domain/repositories/article-repository.ts (INTERFACE ONLY)
-export interface ArticleRepository {
-  findById(id: ArticleId): Promise<Result<Article | null, ValidationError | NotFoundError>>;
-  save(article: Article): Promise<Result<void, ValidationError>>;
-  delete(id: ArticleId): Promise<Result<void, ValidationError | NotFoundError>>;
-  // ...
-}
-
-// infrastructure/db/dynamodb-article-repository.ts (IMPLEMENTATION)
-export class DynamoDBArticleRepository implements ArticleRepository {
-  private client: DynamoDBClient;
-
-  async findById(articleId: ArticleId): Promise<Result<Article | null, ValidationError | NotFoundError>> {
-    try {
-      const result = await this.client.send(new QueryCommand({ ... }));
-      if (!result.Items || result.Items.length === 0) {
-        return ok(null);
-      }
-      const article = this.fromDBItem(unmarshall(result.Items[0]));
-      return ok(article);
-    } catch (error) {
-      return err(new ValidationError(`記事の取得に失敗しました: ${error.message}`));
-    }
-  }
-
-  // ...
-}
-```
-
-### 5. Application Services with Dependency Injection
-
-**Application layer uses class-based services with constructor injection:**
-
-```typescript
-// application/articleService.ts
-export class ArticleApplicationService {
-  constructor(
-    private articleRepo: ArticleRepository,
-    private userRepo: UserRepository
-  ) {}
-
-  async createArticle(dto: CreateArticleDto): Promise<Result<ArticleInfoDto, ValidationError | NotFoundError>> {
-    // 1. Validate user exists
-    const userResult = await this.userRepo.findById(dto.userId as UserId);
-    if (!userResult.ok) return userResult;
-    if (!userResult.value) {
-      return err(new NotFoundError('ユーザー', dto.userId));
-    }
-
-    // 2. Create article entity (domain logic)
-    const articleResult = createUninitializedArticle(params);
-    if (!articleResult.ok) return articleResult;
-
-    // 3. Save to repository
-    const saveResult = await this.articleRepo.save(articleResult.value);
-    if (!saveResult.ok) return saveResult;
-
-    // 4. Return DTO
-    return ok(this.toArticleInfoDto(articleResult.value));
-  }
-}
-```
-
-**DI setup in API layer:**
-
-```typescript
-// api/index.ts
-// Initialize repositories
-const articleRepository = useInMemory
-  ? new InMemoryArticleRepository()
-  : new DynamoDBArticleRepository();
-
-const userRepository = new InMemoryUserRepository();
-
-// Initialize services
-const articleService = new ArticleApplicationService(articleRepository, userRepository);
-
-// Inject into Hono context
-app.use('*', async (c, next) => {
-  c.set('articleService', articleService);
-  await next();
-});
-```
-
-### 6. Layer Dependencies
-
-```
-┌─────────────────┐
-│   API Layer     │  ← HTTP handlers, Zod validation
-└────────┬────────┘
-         │ depends on
-┌────────▼────────┐
-│  Application    │  ← Use cases, orchestration (classes with DI)
-└────────┬────────┘
-         │ depends on
-┌────────▼────────┐
-│    Domain       │  ← Business logic (pure functions, interfaces)
-└─────────────────┘
-         ▲
-         │ implements
-┌────────┴────────┐
-│ Infrastructure  │  ← DB, external APIs (implementations)
-└─────────────────┘
-```
-
-**Rules:**
-- ✅ Domain layer has NO dependencies (only pure functions and interfaces)
-- ✅ Application layer depends on domain interfaces
-- ✅ Infrastructure implements domain interfaces
-- ✅ API layer uses application services
-- ❌ Domain layer NEVER imports from infrastructure
-- ❌ Domain layer NEVER uses Zod (API layer only)
-
-## Development Workflow
-
-### Adding a New Feature
-
-1. **Define Domain Types and Functions**
-   ```typescript
-   // src/domain/entities/article.ts
-   export interface Article {
-     articleId: ArticleId;
-     title: string;
-     // ...
-   }
-
-   export function createArticle(params: CreateArticleParams): Result<Article, ValidationError> {
-     // Validation logic
-     if (!params.title.trim()) {
-       return err(new ValidationError('タイトルは必須です'));
-     }
-     return ok({ ...params, articleId: crypto.randomUUID() });
-   }
-   ```
-
-2. **Write Tests (TDD)**
-   ```typescript
-   // src/domain/entities/article.test.ts
-   describe('createArticle', () => {
-     it('should create article with valid params', () => {
-       const result = createArticle({ title: 'Test', ... });
-       expect(result.ok).toBe(true);
-     });
-
-     it('should return error for empty title', () => {
-       const result = createArticle({ title: '', ... });
-       expect(result.ok).toBe(false);
-       if (!result.ok) {
-         expect(result.error.message).toContain('タイトルは必須です');
-       }
-     });
-   });
-   ```
-
-3. **Define Repository Interface**
-   ```typescript
-   // src/domain/repositories/article-repository.ts
-   export interface ArticleRepository {
-     save(article: Article): Promise<Result<void, ValidationError>>;
-     findById(id: ArticleId): Promise<Result<Article | null, ValidationError>>;
-   }
-   ```
-
-4. **Implement Repository**
-   ```typescript
-   // src/infrastructure/db/inMemoryArticleRepository.ts
-   export class InMemoryArticleRepository implements ArticleRepository {
-     private articles = new Map<string, Article>();
-
-     async findById(id: ArticleId): Promise<Result<Article | null, ValidationError>> {
-       return ok(this.articles.get(id) || null);
-     }
-
-     async save(article: Article): Promise<Result<void, ValidationError>> {
-       this.articles.set(article.articleId, article);
-       return ok(undefined);
-     }
-   }
-   ```
-
-5. **Create Application Service**
-   ```typescript
-   // src/application/articleService.ts
-   export class ArticleApplicationService {
-     constructor(private articleRepo: ArticleRepository) {}
-
-     async createArticle(dto: CreateArticleDto): Promise<Result<ArticleDto, ValidationError>> {
-       const articleResult = createArticle(dto);
-       if (!articleResult.ok) return articleResult;
-
-       const saveResult = await this.articleRepo.save(articleResult.value);
-       if (!saveResult.ok) return saveResult;
-
-       return ok(this.toDto(articleResult.value));
-     }
-   }
-   ```
-
-6. **Add API Route**
-   ```typescript
-   // src/api/routes/articles.ts
-   const CreateArticleSchema = z.object({
-     title: z.string().min(1),
-     url: z.string().url(),
-   });
-
-   articlesRouter.post('/manual', async (c) => {
-     const articleService = c.get('articleService');
-
-     const bodyResult = CreateArticleSchema.safeParse(await c.req.json());
-     if (!bodyResult.success) {
-       return c.json({ error: 'Invalid request body' }, 400);
-     }
-
-     const result = await articleService.createArticle(bodyResult.data);
-     if (!result.ok) {
-       return c.json({ error: result.error.message }, 400);
-     }
-
-     return c.json({ article: result.value }, 201);
-   });
-   ```
-
-## Testing
-
-### Unit Tests (Domain)
-
-```typescript
-describe('calculatePriorityScore', () => {
-  it('should increase score for matching category', () => {
-    const article = createTestArticle({ category: 'technology' });
-    const profile = { category: 'technology', skillLevel: 'intermediate' };
-
-    const scored = calculatePriorityScore(article, profile);
-
-    expect(scored.priorityScore).toBeGreaterThan(50);
-  });
-
-  it('should return Result error for invalid input', () => {
-    const result = createArticle({ title: '' });
-
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.name).toBe('ValidationError');
-    }
-  });
-});
-```
-
-### Integration Tests (Repository)
-
-```typescript
-describe('InMemoryArticleRepository', () => {
-  let repository: ArticleRepository;
-
-  beforeEach(() => {
-    repository = new InMemoryArticleRepository();
-  });
-
-  it('should save and retrieve article', async () => {
-    const article = createTestArticle();
-
-    const saveResult = await repository.save(article);
-    expect(saveResult.ok).toBe(true);
-
-    const findResult = await repository.findById(article.articleId);
-    expect(findResult.ok).toBe(true);
-    expect(findResult.value).toMatchObject(article);
-  });
-});
-```
-
-## Common Patterns
-
-### Factory Functions (Domain)
-
-```typescript
-export function createUninitializedArticle(
-  params: CreateArticleParams
-): Result<Article, ValidationError> {
-  // Validation
-  if (!params.title.trim()) {
-    return err(new ValidationError('タイトルは必須です'));
-  }
-  if (!params.url.trim()) {
-    return err(new ValidationError('URLは必須です'));
-  }
-
-  // Create entity
-  const article: Article = {
-    articleId: crypto.randomUUID() as ArticleId,
-    userId: params.userId,
-    sourceId: params.sourceId,
-    sourceType: params.sourceType,
-    url: params.url,
-    title: params.title,
-    contentPreview: params.contentPreview,
-    language: params.language,
-    collectedAt: Date.now(),
-    ttl: Date.now() + 90 * 24 * 60 * 60 * 1000, // 90 days
-    category: 'technology', // Default
-    subcategories: [],
-    priorityScore: 50 as PriorityScore,
-    trendingScore: 0,
-    summaryShort: '',
-    summaryDetailed: '',
-    keyPoints: [],
-    keywords: [],
-    recommendationTag: 'new',
-  };
-
-  return ok(article);
-}
-```
-
-### Update Functions (Domain)
-
-```typescript
-export function updateAnalysisResult(
-  article: Article,
-  analysis: AnalysisResult
-): Result<Article, ValidationError> {
-  // Validation
-  if (!analysis.summaryShort.trim()) {
-    return err(new ValidationError('要約は必須です'));
-  }
-
-  // Return NEW object (immutable)
-  return ok({
-    ...article,
-    category: analysis.category,
-    subcategories: analysis.subcategories,
-    technicalLevel: analysis.technicalLevel,
-    summaryShort: analysis.summaryShort,
-    summaryDetailed: analysis.summaryDetailed,
-    keyPoints: analysis.keyPoints,
-    keywords: analysis.keywords,
-    aiProvider: analysis.aiProvider,
-    aiModel: analysis.aiModel,
-    analyzedAt: Date.now(),
-    analysisVersion: '1.0.0',
-  });
-}
-```
-
-### Error Handling
-
-```typescript
-// Core error types
 export class ValidationError extends Error {
   constructor(message: string) {
     super(message);
@@ -523,71 +148,314 @@ export class NotFoundError extends Error {
     this.name = 'NotFoundError';
   }
 }
+```
 
-// Usage in HTTP handlers
-const result = await articleService.createArticle(dto);
-if (!result.ok) {
-  if (result.error.name === 'NotFoundError') {
-    return c.json({ error: result.error.message }, 404);
-  }
-  return c.json({ error: result.error.message }, 400);
+### 4. Branded Types with Zod
+
+**Use `.brand()` for IDs:**
+
+```typescript
+// ✅ GOOD: Branded types for IDs
+export const userIdSchema = z.string().uuid().brand<'UserId'>();
+export type UserId = z.infer<typeof userIdSchema>;
+
+// Helper function
+export function generateUserId(): UserId {
+  return crypto.randomUUID() as UserId;
 }
 ```
 
-## References
+### 5. RFC 9457 Error Responses
 
-- **[mizchi/ailab](https://github.com/mizchi/ailab)**: DDD/TDD patterns, Result types, pure functions
-- **Hono**: Fast web framework for TypeScript
-- **Zod**: TypeScript-first schema validation (API layer only)
+**Use Problem Details for HTTP APIs:**
+
+```typescript
+// api/schemas/common.schema.ts
+export const ProblemDetailsSchema = z.object({
+  type: z.string().url().default('about:blank'),
+  title: z.string(),
+  status: z.number().int().min(100).max(599).optional(),
+  detail: z.string().optional(),
+  instance: z.string().optional(),
+  errors: z.array(z.record(z.unknown())).optional(),
+});
+
+// Example response
+{
+  "type": "https://api.example.com/problems/validation-error",
+  "title": "バリデーションエラー",
+  "status": 400,
+  "detail": "メールアドレスの形式が正しくありません",
+  "instance": "/api/users/123",
+  "errors": [{ "field": "email", "message": "無効です" }]
+}
+```
+
+### 6. No Audit Fields in Domain
+
+**Keep domain models pure (no DB concerns):**
+
+```typescript
+// ✅ GOOD: Pure domain model
+export const userSchema = z.object({
+  userId: userIdSchema,
+  email: emailSchema,
+  profile: userProfileSchema,
+  settings: z.record(z.unknown()),
+  // NO createdAt, updatedAt
+});
+
+// Infrastructure layer handles audit info (future)
+interface UserRecord {
+  user: User;
+  createdAt: number;
+  updatedAt: number;
+}
+```
+
+## Development Workflow
+
+### 1. Define Domain Schema (SSOT)
+
+```typescript
+// domain/users/user.schema.ts
+export const createUserParamsSchema = z.object({
+  userId: userIdSchema,
+  email: emailSchema,
+  displayName: z.string().optional(),
+  primaryCategory: categorySchema,
+  skillLevel: technicalLevelSchema,
+});
+
+export type CreateUserParams = z.infer<typeof createUserParamsSchema>;
+```
+
+### 2. Write Domain Logic
+
+```typescript
+// domain/users/user.entity.ts
+export function createUser(params: CreateUserParams): Result<User, ValidationError> {
+  // Business rules only (no form validation)
+  const user: User = {
+    userId: params.userId,
+    email: params.email,
+    profile: {
+      primaryCategory: params.primaryCategory,
+      skillLevel: params.skillLevel,
+      interests: [],
+      skills: [],
+    },
+    settings: {},
+  };
+
+  return ok(user);
+}
+```
+
+### 3. Write Tests (TDD)
+
+```typescript
+// domain/users/user.entity.test.ts
+describe('createUser', () => {
+  it('should create user with valid params', () => {
+    const params: CreateUserParams = {
+      userId: 'uuid' as UserId,
+      email: 'test@example.com',
+      // ...
+    };
+
+    const result = createUser(params);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.userId).toBe(params.userId);
+    }
+  });
+});
+```
+
+### 4. API Layer (future)
+
+```typescript
+// api/routes/users/users.route.ts
+import { createUserParamsSchema } from '../../../domain/users/user.schema';
+import { createUser } from '../../../domain/users/user.entity';
+
+router.post('/users', async (c) => {
+  // Schema validation
+  const parseResult = createUserParamsSchema.safeParse(await c.req.json());
+  if (!parseResult.success) {
+    return c.json({
+      type: 'https://api.example.com/problems/validation-error',
+      title: 'バリデーションエラー',
+      status: 400,
+      errors: parseResult.error.errors,
+    }, 400);
+  }
+
+  // Domain logic
+  const userResult = createUser(parseResult.data);
+  if (!userResult.ok) {
+    return c.json({
+      type: 'https://api.example.com/problems/business-rule-error',
+      title: 'ビジネスルールエラー',
+      status: 400,
+      detail: userResult.error.message,
+    }, 400);
+  }
+
+  return c.json({ user: userResult.value }, 201);
+});
+```
+
+## Testing
+
+### Unit Tests (Domain)
+
+```typescript
+describe('User entity', () => {
+  it('should create user with business rules', () => {
+    const result = createUser(validParams);
+    expect(result.ok).toBe(true);
+  });
+
+  it('should return error for business rule violation', () => {
+    const result = someBusinessRuleFunction(invalidParams);
+    expect(result.ok).toBe(false);
+  });
+});
+```
+
+## Common Patterns
+
+### Factory Functions
+
+```typescript
+export function createUser(params: CreateUserParams): Result<User, ValidationError> {
+  // Business rules validation
+  // NO form validation (handled by Schema)
+
+  const user: User = {
+    userId: params.userId,
+    email: params.email,
+    profile: {
+      primaryCategory: params.primaryCategory,
+      skillLevel: params.skillLevel,
+      interests: params.interests || [],
+      skills: params.skills || [],
+    },
+    settings: {},
+  };
+
+  return ok(user);
+}
+```
+
+### Update Functions
+
+```typescript
+export function updateUserProfile(
+  user: User,
+  updates: UpdateUserProfileParams
+): Result<User, ValidationError> {
+  // Business rules validation
+
+  const updated: User = {
+    ...user,
+    profile: {
+      ...user.profile,
+      primaryCategory: updates.primaryCategory ?? user.profile.primaryCategory,
+      skillLevel: updates.skillLevel ?? user.profile.skillLevel,
+      interests: updates.interests ?? user.profile.interests,
+      skills: updates.skills ?? user.profile.skills,
+    },
+  };
+
+  return ok(updated);
+}
+```
+
+## Layer Dependencies
+
+```
+┌─────────────────┐
+│   API Layer     │  ← HTTP, .safeParse(), RFC 9457 errors
+└────────┬────────┘
+         │ depends on
+┌────────▼────────┐
+│  Application    │  ← Use cases (future)
+└────────┬────────┘
+         │ depends on
+┌────────▼────────┐
+│    Domain       │  ← Business logic (pure functions, Result type)
+└─────────────────┘
+         ▲
+         │ implements
+┌────────┴────────┐
+│ Infrastructure  │  ← DB, external APIs
+└─────────────────┘
+```
+
+**Rules:**
+- ✅ Domain layer: Zod schemas (SSOT), pure functions, Result type
+- ✅ Application layer: `.safeParse()` for form validation, orchestration
+- ✅ API layer: HTTP, RFC 9457 errors, no business logic
+- ✅ Infrastructure: implements domain interfaces
+- ❌ Domain NEVER imports from infrastructure
+- ❌ Domain NEVER does form validation (Schema handles it)
 
 ## Important Notes for Claude Code
 
 ### ✅ DO:
 - Always write tests first (TDD)
-- Use Result type for ALL error handling
-- Keep domain layer pure (only functions, no classes)
-- Use immutable updates (return new objects)
-- Use Zod ONLY in API layer for HTTP validation
-- Define repository interfaces in domain layer
-- Implement repositories in infrastructure layer
-- Use class-based services with DI in application layer
-- Use branded types for IDs (ArticleId, UserId, etc.)
+- Use Result type for business rule validation
+- Use `.safeParse()` for form validation (Application/API layer)
+- Keep domain layer pure (only functions)
+- Use Zod schemas as SSOT with `z.infer`
+- Use `.brand()` for IDs
+- Import neverthrow directly
+- Use RFC 9457 for error responses
+- Return new objects (immutable)
 
 ### ❌ DON'T:
 - Never throw exceptions in domain/application layers
-- Never use Zod in domain layer
-- Never mutate objects (always return new ones)
-- Never import infrastructure in domain layer
-- Never use `any` type (use `unknown` and type guards)
-- Never use classes in domain layer (pure functions only)
-- Never put business logic in API handlers (use application services)
+- Never use `.parse()` in domain layer (use `.safeParse()` in API layer)
+- Never duplicate validation logic
+- Never mutate objects
+- Never put business logic in API handlers
+- Never use `any` type
+- Never add `createdAt`/`updatedAt` to domain models
 
 ## Code Style
 
 ```typescript
-// ✅ GOOD: Pure function with Result type
-export function createArticle(params: CreateArticleParams): Result<Article, ValidationError> {
-  if (!params.title.trim()) {
-    return err(new ValidationError('タイトルは必須です'));
-  }
-  return ok({ ...params, articleId: crypto.randomUUID() as ArticleId });
+// ✅ GOOD: Schema-First with Always-Valid Domain Model
+// Schema (SSOT)
+export const createUserParamsSchema = z.object({
+  userId: userIdSchema,
+  email: emailSchema,
+  displayName: z.string().optional(),
+});
+export type CreateUserParams = z.infer<typeof createUserParamsSchema>;
+
+// Domain (business rules only)
+export function createUser(params: CreateUserParams): Result<User, ValidationError> {
+  // No form validation - Schema guarantees validity
+  return ok({ ...params, settings: {} });
 }
 
-// ❌ BAD: Throwing exceptions
-export function createArticle(params: CreateArticleParams): Article {
-  if (!params.title.trim()) {
-    throw new Error('タイトルは必須です'); // Don't throw!
-  }
-  return { ...params, articleId: crypto.randomUUID() };
+// API (form validation)
+const parseResult = createUserParamsSchema.safeParse(input);
+if (!parseResult.success) {
+  return c.json(problemDetails, 400);
 }
-
-// ❌ BAD: Mutation
-export function updateArticle(article: Article, title: string): void {
-  article.title = title; // Don't mutate!
-}
-
-// ✅ GOOD: Immutable update
-export function updateArticle(article: Article, title: string): Article {
-  return { ...article, title }; // Return new object
-}
+const userResult = createUser(parseResult.data);
 ```
+
+## TODO
+
+- [ ] Implement Application layer services
+- [ ] Add camelCase ↔ snake_case conversion (ts-case-convert or radash)
+- [ ] Migrate all routes to use ProblemDetailsSchema
+- [ ] Add comprehensive domain tests
+- [ ] Implement DynamoDB repositories

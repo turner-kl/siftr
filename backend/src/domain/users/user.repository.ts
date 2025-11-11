@@ -2,9 +2,9 @@
  * User Repository Interface (Domain Layer)
  */
 
-import type { NotFoundError, Result, ValidationError } from '../../core/result';
-import type { User } from './user.entity';
-import type { UserId } from '../types';
+import type { Result } from 'neverthrow';
+import type { NotFoundError, ValidationError } from '../../core/errors';
+import type { User, UserId } from './user.schema';
 
 /**
  * User Repository Interface

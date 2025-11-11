@@ -1,14 +1,13 @@
 import { OpenAPIHono, createRoute } from '@hono/zod-openapi';
 import type { AuthUser } from '../../middleware/auth';
 import {
-  ErrorResponseSchema,
   PreferencesResponseSchema,
-  SuccessResponseSchema,
   UpdatePreferencesSchema,
   UpdateProfileSchema,
   UpdateSkillProfilesSchema,
   UserProfileResponseSchema,
 } from './me.schema';
+import {SuccessResponseSchema, ErrorResponseSchema} from '../../schemas/common.schema'
 
 export const meRouter = new OpenAPIHono<{ Variables: { user: AuthUser } }>();
 
