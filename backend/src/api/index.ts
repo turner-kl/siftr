@@ -1,6 +1,7 @@
 import { serve } from '@hono/node-server';
-import { swaggerUI } from '@hono/swagger-ui';
-import { OpenAPIHono } from '@hono/zod-openapi';
+import { Scalar } from '@scalar/hono-api-reference';
+import { Hono } from 'hono';
+import { openAPIRouteHandler } from 'hono-openapi';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
@@ -13,7 +14,7 @@ type Variables = {
   user: AuthUser;
 };
 
-const app = new OpenAPIHono<{ Variables: Variables }>();
+const app = new Hono<{ Variables: Variables }>();
 
 // Middleware
 app.use('*', logger());
@@ -44,23 +45,27 @@ app.use('/api/*', authMiddleware);
 const routes = app.route('/api/me', meRouter);
 
 // OpenAPI documentation endpoint
-app.doc('/doc', {
-  openapi: '3.0.0',
-  info: {
-    title: 'Siftr API',
-    version: '0.1.0',
-    description: 'AI駆動型パーソナライズド情報キュレーションシステムのAPI',
-  },
-  servers: [
-    {
-      url: process.env.API_URL || 'http://localhost:3001',
-      description: process.env.NODE_ENV !== 'production' ? 'ローカル開発環境' : '本番環境',
+app.get(
+  '/openapi',
+  openAPIRouteHandler(app, {
+    documentation: {
+      info: {
+        title: 'Siftr API',
+        version: '0.1.0',
+        description: 'AI駆動型パーソナライズド情報キュレーションシステムのAPI',
+      },
+      servers: [
+        {
+          url: process.env.API_URL || 'http://localhost:3001',
+          description: process.env.NODE_ENV !== 'production' ? 'ローカル開発環境' : '本番環境',
+        },
+      ],
     },
-  ],
-});
+  })
+);
 
-// Swagger UI
-app.get('/ui', swaggerUI({ url: '/doc' }));
+// Scalar API Reference UI
+app.get('/ui', Scalar({ url: '/openapi' }));
 
 // Error handler
 app.onError((err, c) => {

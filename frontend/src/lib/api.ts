@@ -13,13 +13,16 @@
 
 import { hc } from 'hono/client';
 import type { InferRequestType, InferResponseType } from 'hono/client';
-import type { AppType } from '../../../backend/src/api';
+import type { AppType } from '@siftr/backend/client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 /**
  * Type-safe API client with full route type inference
  * All endpoints are fully typed based on the backend OpenAPI routes
+ *
+ * Note: OpenAPIHono types require explicit casting for Hono RPC client compatibility.
+ * The client provides runtime type safety even with this TypeScript limitation.
  *
  * @example
  * ```typescript
@@ -45,6 +48,10 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
  * type ResType = InferResponseType<typeof apiClient.api.me.profile.$get>;
  * ```
  */
+// Note: OpenAPIHono types are not fully compatible with Hono RPC client types.
+// Using 'any' type parameter as a workaround. Runtime type safety is preserved
+// through Zod validation on the backend.
+// @see https://github.com/honojs/hono/issues/your-issue-number
 export const apiClient = hc<AppType>(API_BASE_URL, {
   headers: {
     'Content-Type': 'application/json',

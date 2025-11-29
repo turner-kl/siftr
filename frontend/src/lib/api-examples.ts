@@ -5,24 +5,16 @@
  * with proper error handling and type inference.
  *
  * @see https://hono.dev/docs/guides/rpc
- * @see https://dev.classmethod.jp/articles/hono-zod-openapi-schema-driven-api-development/
  */
 
 import { apiClient, type InferRequestType, type InferResponseType } from './api';
 
 // ============================================================================
-// Example 1: Basic GET Request with Status Code Handling
+// Example 1: Basic GET Request
 // ============================================================================
 
 export async function getUserProfile() {
   const res = await apiClient.api.me.profile.$get();
-
-  // ✅ Status code specific handling with type inference
-  if (res.status === 404) {
-    const error = await res.json(); // Type: { error: string }
-    console.error('User not found:', error.error);
-    return null;
-  }
 
   if (res.ok) {
     const data = await res.json(); // Type: UserProfileResponse
@@ -31,7 +23,7 @@ export async function getUserProfile() {
     return data;
   }
 
-  throw new Error('Unexpected response status');
+  throw new Error('Failed to fetch user profile');
 }
 
 // ============================================================================
@@ -46,18 +38,12 @@ export async function updateUserProfile(displayName: string) {
     },
   });
 
-  if (res.status === 400) {
-    const error = await res.json(); // Type: ErrorResponse
-    console.error('Validation error:', error);
-    return { success: false, error };
-  }
-
   if (res.ok) {
     const result = await res.json(); // Type: { success: boolean }
     return result;
   }
 
-  throw new Error('Unexpected response status');
+  throw new Error('Failed to update profile');
 }
 
 // ============================================================================
@@ -73,7 +59,7 @@ type ProfileResponse = InferResponseType<typeof apiClient.api.me.profile.$get>;
 type ProfileResponse200 = InferResponseType<typeof apiClient.api.me.profile.$get, 200>;
 
 // Use inferred types in function signatures
-export async function updateProfileTyped(body: UpdateProfileBody): Promise<ProfileResponse200 | null> {
+export async function updateProfileTyped(body: UpdateProfileBody): Promise<{ success: boolean } | null> {
   const res = await apiClient.api.me.profile.$put({ json: body });
 
   if (res.ok) {
@@ -88,26 +74,21 @@ export async function updateProfileTyped(body: UpdateProfileBody): Promise<Profi
 // ============================================================================
 
 export async function updateSkillProfiles(data: {
-  primary_category?: string;
-  skill_level?: string;
+  primary_category?: 'technology' | 'hr' | 'business';
+  skill_level?: 'beginner' | 'intermediate' | 'advanced';
   interests?: string[];
-  skills?: Array<{ keyword: string; level: string }>;
+  skills?: Array<{ keyword: string; level: 'beginner' | 'intermediate' | 'advanced' }>;
 }) {
   const res = await apiClient.api.me['skill-profiles'].$put({
     json: data,
   });
-
-  if (res.status === 400) {
-    const error = await res.json();
-    return { success: false, error };
-  }
 
   if (res.ok) {
     const result = await res.json();
     return result;
   }
 
-  throw new Error('Unexpected response status');
+  throw new Error('Failed to update skill profiles');
 }
 
 // ============================================================================

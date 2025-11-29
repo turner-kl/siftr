@@ -17,7 +17,7 @@ export type { Category, TechnicalLevel };
 /**
  * UserId schema with validation and branding
  */
-export const userIdSchema = z.string().uuid('有効なUUID形式が必要です').brand<'UserId'>();
+export const userIdSchema = z.string().uuid().brand<'UserId'>();
 export type UserId = z.infer<typeof userIdSchema>;
 
 /**
@@ -25,7 +25,7 @@ export type UserId = z.infer<typeof userIdSchema>;
  */
 export const emailSchema = z
   .string()
-  .email('有効なメールアドレスが必要です')
+  .email()
   .transform((email) => email.toLowerCase().trim());
 
 // ============================================================================
@@ -64,10 +64,10 @@ export type UserProfile = z.infer<typeof userProfileSchema>;
 export const userSchema = z.object({
   userId: userIdSchema,
   email: emailSchema,
-  cognitoSub: z.string().min(1, 'Cognito Subは必須です'),
+  cognitoSub: z.string().min(1),
   displayName: z.string().optional(),
   profile: userProfileSchema,
-  settings: z.record(z.unknown()),
+  settings: z.record(z.string(), z.unknown()),
 });
 
 export type User = z.infer<typeof userSchema>;
@@ -83,7 +83,7 @@ export type User = z.infer<typeof userSchema>;
 export const createUserParamsSchema = z.object({
   userId: userIdSchema,
   email: emailSchema,
-  cognitoSub: z.string().min(1, 'Cognito Subは必須です'),
+  cognitoSub: z.string().min(1),
   displayName: z.string().optional(),
   primaryCategory: categorySchema,
   skillLevel: technicalLevelSchema,
@@ -110,6 +110,6 @@ export type UpdateUserProfileParams = z.infer<typeof updateUserProfileParamsSche
  * Parameters for updating user settings
  * Used by Application layer to validate unknown request
  */
-export const updateUserSettingsParamsSchema = z.record(z.unknown());
+export const updateUserSettingsParamsSchema = z.record(z.string(), z.unknown());
 
 export type UpdateUserSettingsParams = z.infer<typeof updateUserSettingsParamsSchema>;
