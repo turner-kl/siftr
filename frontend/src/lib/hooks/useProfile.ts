@@ -3,8 +3,8 @@
  * Provides type-safe data fetching with caching, revalidation, and optimistic updates
  */
 
-import useSWR, { type SWRConfiguration } from 'swr';
-import { apiClient } from '@/lib/api';
+import { type SWRConfiguration, default as useSWR } from "swr";
+import { apiClient } from "@/lib/api";
 
 // Fetcher function for profile
 const fetchProfile = async () => {
@@ -30,7 +30,7 @@ const fetchProfile = async () => {
  * ```
  */
 export function useProfile(config?: SWRConfiguration) {
-  return useSWR('/api/me/profile', fetchProfile, {
+  return useSWR("/api/me/profile", fetchProfile, {
     revalidateOnFocus: false,
     revalidateOnReconnect: true,
     dedupingInterval: 10000, // 10 seconds
@@ -41,7 +41,10 @@ export function useProfile(config?: SWRConfiguration) {
 /**
  * Update profile with optimistic UI
  */
-export async function updateProfile(data: { display_name?: string; settings?: Record<string, unknown> }) {
+export async function updateProfile(data: {
+  display_name?: string;
+  settings?: Record<string, unknown>;
+}) {
   const res = await apiClient.api.me.profile.$put({ json: data });
   if (!res.ok) {
     throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -53,12 +56,15 @@ export async function updateProfile(data: { display_name?: string; settings?: Re
  * Update skill profiles with optimistic UI
  */
 export async function updateSkillProfiles(data: {
-  primary_category?: 'technology' | 'hr' | 'business';
-  skill_level?: 'beginner' | 'intermediate' | 'advanced';
+  primary_category?: "technology" | "hr" | "business";
+  skill_level?: "beginner" | "intermediate" | "advanced";
   interests?: string[];
-  skills?: Array<{ keyword: string; level: 'beginner' | 'intermediate' | 'advanced' }>;
+  skills?: Array<{
+    keyword: string;
+    level: "beginner" | "intermediate" | "advanced";
+  }>;
 }) {
-  const res = await apiClient.api.me['skill-profiles'].$put({ json: data });
+  const res = await apiClient.api.me["skill-profiles"].$put({ json: data });
   if (!res.ok) {
     throw new Error(`HTTP ${res.status}: ${res.statusText}`);
   }

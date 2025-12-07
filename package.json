@@ -1,0 +1,24 @@
+{
+  "name": "@siftr/root",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "dev:backend": "pnpm --filter @siftr/backend dev",
+    "dev:frontend": "pnpm --filter @siftr/frontend dev",
+    "build": "pnpm -r build",
+    "build:backend": "pnpm --filter @siftr/backend build",
+    "build:frontend": "pnpm --filter @siftr/frontend build",
+    "test": "pnpm -r test",
+    "test:backend": "pnpm --filter @siftr/backend test",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "format": "pnpm -r format",
+    "format:fix": "pnpm -r format:fix",
+    "typecheck": "pnpm -r typecheck",
+    "clean": "pnpm -r clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

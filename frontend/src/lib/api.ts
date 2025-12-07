@@ -11,11 +11,11 @@
  * @see https://hono.dev/docs/examples/zod-openapi
  */
 
-import { hc } from 'hono/client';
-import type { InferRequestType, InferResponseType } from 'hono/client';
-import type { AppType } from '@siftr/backend/client';
+import type { AppType } from "@siftr/backend/client";
+import type { InferRequestType, InferResponseType } from "hono/client";
+import { hc } from "hono/client";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 /**
  * Type-safe API client with full route type inference
@@ -54,7 +54,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 // @see https://github.com/honojs/hono/issues/your-issue-number
 export const apiClient = hc<AppType>(API_BASE_URL, {
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   // TODO: Add auth token from Cognito
   // headers: () => ({

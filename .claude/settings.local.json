@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run typecheck:*)",
+      "Bash(src/domain/articles/article.entity.test.ts)",
+      "Bash(src/api/routes/articles/articles.route.ts src/api/routes/me/me.route.ts)",
+      "Bash(src/application/articleService.ts)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

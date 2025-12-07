@@ -7,7 +7,11 @@
  * @see https://hono.dev/docs/guides/rpc
  */
 
-import { apiClient, type InferRequestType, type InferResponseType } from './api';
+import {
+  apiClient,
+  type InferRequestType,
+  type InferResponseType,
+} from "./api";
 
 // ============================================================================
 // Example 1: Basic GET Request
@@ -18,12 +22,12 @@ export async function getUserProfile() {
 
   if (res.ok) {
     const data = await res.json(); // Type: UserProfileResponse
-    console.log('User:', data.user);
-    console.log('Profile:', data.profile);
+    console.log("User:", data.user);
+    console.log("Profile:", data.profile);
     return data;
   }
 
-  throw new Error('Failed to fetch user profile');
+  throw new Error("Failed to fetch user profile");
 }
 
 // ============================================================================
@@ -43,7 +47,7 @@ export async function updateUserProfile(displayName: string) {
     return result;
   }
 
-  throw new Error('Failed to update profile');
+  throw new Error("Failed to update profile");
 }
 
 // ============================================================================
@@ -51,15 +55,22 @@ export async function updateUserProfile(displayName: string) {
 // ============================================================================
 
 // Infer request type from endpoint
-type UpdateProfileRequest = InferRequestType<typeof apiClient.api.me.profile.$put>;
-type UpdateProfileBody = UpdateProfileRequest['json']; // { display_name?: string, settings?: Record<string, unknown> }
+type UpdateProfileRequest = InferRequestType<
+  typeof apiClient.api.me.profile.$put
+>;
+type UpdateProfileBody = UpdateProfileRequest["json"]; // { display_name?: string, settings?: Record<string, unknown> }
 
 // Infer response type from endpoint
 type ProfileResponse = InferResponseType<typeof apiClient.api.me.profile.$get>;
-type ProfileResponse200 = InferResponseType<typeof apiClient.api.me.profile.$get, 200>;
+type ProfileResponse200 = InferResponseType<
+  typeof apiClient.api.me.profile.$get,
+  200
+>;
 
 // Use inferred types in function signatures
-export async function updateProfileTyped(body: UpdateProfileBody): Promise<{ success: boolean } | null> {
+export async function updateProfileTyped(
+  body: UpdateProfileBody,
+): Promise<{ success: boolean } | null> {
   const res = await apiClient.api.me.profile.$put({ json: body });
 
   if (res.ok) {
@@ -74,12 +85,15 @@ export async function updateProfileTyped(body: UpdateProfileBody): Promise<{ suc
 // ============================================================================
 
 export async function updateSkillProfiles(data: {
-  primary_category?: 'technology' | 'hr' | 'business';
-  skill_level?: 'beginner' | 'intermediate' | 'advanced';
+  primary_category?: "technology" | "hr" | "business";
+  skill_level?: "beginner" | "intermediate" | "advanced";
   interests?: string[];
-  skills?: Array<{ keyword: string; level: 'beginner' | 'intermediate' | 'advanced' }>;
+  skills?: Array<{
+    keyword: string;
+    level: "beginner" | "intermediate" | "advanced";
+  }>;
 }) {
-  const res = await apiClient.api.me['skill-profiles'].$put({
+  const res = await apiClient.api.me["skill-profiles"].$put({
     json: data,
   });
 
@@ -88,7 +102,7 @@ export async function updateSkillProfiles(data: {
     return result;
   }
 
-  throw new Error('Failed to update skill profiles');
+  throw new Error("Failed to update skill profiles");
 }
 
 // ============================================================================
@@ -110,7 +124,7 @@ export async function getUserPreferences() {
     return preferences;
   }
 
-  throw new Error('Failed to fetch preferences');
+  throw new Error("Failed to fetch preferences");
 }
 
 // ============================================================================
@@ -119,7 +133,7 @@ export async function getUserPreferences() {
 
 export async function updatePreferences(updates: {
   notification_enabled?: boolean;
-  email_digest_frequency?: 'daily' | 'weekly' | 'never';
+  email_digest_frequency?: "daily" | "weekly" | "never";
   articles_per_page?: number;
 }) {
   const res = await apiClient.api.me.preferences.$put({
@@ -144,11 +158,11 @@ type ApiError = {
 };
 
 function isApiError(data: unknown): data is ApiError {
-  return typeof data === 'object' && data !== null && 'error' in data;
+  return typeof data === "object" && data !== null && "error" in data;
 }
 
 export async function safeApiCall<T>(
-  apiCall: () => Promise<Response>
+  apiCall: () => Promise<Response>,
 ): Promise<{ data: T | null; error: ApiError | null }> {
   try {
     const res = await apiCall();
@@ -163,11 +177,11 @@ export async function safeApiCall<T>(
       return { data: null, error: errorData };
     }
 
-    return { data: null, error: { error: 'Unknown error' } };
+    return { data: null, error: { error: "Unknown error" } };
   } catch (err) {
     return {
       data: null,
-      error: { error: err instanceof Error ? err.message : 'Unknown error' },
+      error: { error: err instanceof Error ? err.message : "Unknown error" },
     };
   }
 }

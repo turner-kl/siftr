@@ -3,7 +3,7 @@
  * Next.js 15 Server Component with SWR for client-side interactions
  */
 
-import { ProfileClient } from './ProfileClient';
+import { ProfileClient } from "./ProfileClient";
 
 /**
  * Server Component: Initial data fetch at build/request time
