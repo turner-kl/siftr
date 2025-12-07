@@ -84,21 +84,19 @@ app.notFound((c) => {
   return c.json({ error: 'Not found' }, 404);
 });
 
-// For local development
-if (process.env.NODE_ENV !== 'production') {
-  const port = Number.parseInt(process.env.PORT || '3001', 10);
-  const useInMemory = process.env.USE_IN_MEMORY === 'true' || true; // isDevelopment
-  console.log(`🚀 Server starting on http://localhost:${port}`);
-  console.log(`📦 Using ${useInMemory ? 'in-memory' : 'DynamoDB'} repository`);
-  console.log(`📚 API documentation available at http://localhost:${port}/ui`);
-  serve({
-    fetch: app.fetch,
-    port,
-  });
-}
+// Start HTTP server for both local development and Lambda Web Adapter
+const port = Number.parseInt(process.env.PORT || '3001', 10);
+const isDevelopment = process.env.NODE_ENV !== 'production';
+const useInMemory = process.env.USE_IN_MEMORY === 'true' || isDevelopment;
 
-// For Lambda Web Adapter
-export default app;
+console.log(`🚀 Server starting on http://localhost:${port}`);
+console.log(`📦 Using ${useInMemory ? 'in-memory' : 'DynamoDB'} repository`);
+console.log(`📚 API documentation available at http://localhost:${port}/ui`);
+
+serve({
+  fetch: app.fetch,
+  port,
+});
 
 // Export AppType for Hono RPC client (full app routes with type safety)
 export type AppType = typeof routes;

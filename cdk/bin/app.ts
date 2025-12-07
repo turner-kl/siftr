@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { SiftrBackendStack } from '../lib/stacks/siftr-backend-stack';
-import { SiftrFrontendStack } from '../lib/stacks/siftr-frontend-stack';
+import { SiftrBackendStackSimple } from '../lib/stacks/siftr-backend-stack-simple';
 
 const app = new cdk.App();
 
@@ -17,32 +16,14 @@ const projectTags = {
   Environment: environmentName,
 };
 
-// Backend Stack
-const backendStack = new SiftrBackendStack(app, 'SiftrBackendStack', {
+// Simple Backend Stack (CloudFront + Lambda Function URL)
+new SiftrBackendStackSimple(app, 'SiftrBackendStack', {
   env,
   stackName: 'siftr-backend',
-  description: 'siftr - Backend infrastructure (API, Database, Auth)',
+  description: 'siftr - Backend API (CloudFront + Lambda Function URL)',
   tags: projectTags,
+  environment: {
+    NODE_ENV: 'production',
+    USE_IN_MEMORY: 'true',
+  },
 });
-
-// Frontend Stack
-const frontendStack = new SiftrFrontendStack(app, 'SiftrFrontendStack', {
-  env,
-  stackName: 'siftr-frontend',
-  description: 'siftr - Frontend infrastructure (Next.js, CloudFront, Lambda)',
-  tags: projectTags,
-  // Build path (should be provided via environment variable or context)
-  buildPath:
-    process.env.FRONTEND_BUILD_PATH ||
-    app.node.tryGetContext('frontendBuildPath') ||
-    '../frontend/.next/standalone',
-  // Pass backend outputs to frontend (can be retrieved via CloudFormation exports or cross-stack references)
-  apiUrl: backendStack.apiUrl,
-  userPoolId: backendStack.userPoolId,
-  userPoolClientId: backendStack.userPoolClientId,
-});
-
-// Frontend depends on backend
-frontendStack.addDependency(backendStack);
-
-app.synth();

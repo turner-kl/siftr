@@ -7,6 +7,10 @@
     "./client": {
       "types": "./src/api/index.ts",
       "default": "./src/api/index.ts"
+    },
+    "./schemas/*": {
+      "types": "./src/api/routes/*/*.schema.ts",
+      "default": "./src/api/routes/*/*.schema.ts"
     }
   },
   "scripts": {
@@ -46,10 +50,10 @@
     "@types/camelcase-keys": "^4.1.0",
     "@types/node": "^22.10.2",
     "@types/snakecase-keys": "^2.1.0",
-    "esbuild": "^0.24.2",
+    "esbuild": "^0.27.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^4.0.15"
   },
   "engines": {
     "node": ">=20.0.0"
